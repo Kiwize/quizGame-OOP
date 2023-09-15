@@ -1,0 +1,48 @@
+{
+  "questions": [
+    {
+      "id": 0,
+      "descriptionQuestion": "Capital of France",
+      "answers": [
+        {
+          "descriptionAnswer": "Paris",
+          "correct": true
+        },
+        {
+          "descriptionAnswer": "Barcelona",
+          "correct": false
+        },
+        {
+          "descriptionAnswer": "Malaga",
+          "correct": false
+        },
+        {
+          "descriptionAnswer": "London",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "descriptionQuestion": "Capital of Spain",
+      "answers": [
+        {
+          "descriptionAnswer": "Bilbao",
+          "correct": false
+        },
+        {
+          "descriptionAnswer": "Barcelona",
+          "correct": false
+        },
+        {
+          "descriptionAnswer": "Malaga",
+          "correct": false
+        },
+        {
+          "descriptionAnswer": "Madrid",
+          "correct": true
+        }
+      ]
+    }
+  ]
+}
