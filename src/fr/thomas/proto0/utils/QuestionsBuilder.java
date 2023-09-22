@@ -15,8 +15,9 @@ public class QuestionsBuilder {
 
 	/**
 	 * Stubdata des questions
+	 * 
 	 * @param gamecontroller contrôleur de jeu
-	 * @param filePath chemin du fichier
+	 * @param filePath       chemin du fichier
 	 * @return ArrayList<Question> Questions chargées depuis le fichier
 	 * @author Thomas PRADEAU
 	 */
@@ -25,22 +26,22 @@ public class QuestionsBuilder {
 			ArrayList<Question> questions = new ArrayList<Question>();
 			String content = readFromInputStream(filePath);
 			String questionsStringArray[] = content.split("\n");
-			
-			for(String stringQuestion : questionsStringArray) {
+
+			for (String stringQuestion : questionsStringArray) {
 				String elements[] = stringQuestion.split("[|]");
-				
+
 				ArrayList<Answer> answers = new ArrayList<Answer>();
-				
-				for(int i = 1; i < elements.length; i++) {
+
+				for (int i = 1; i < elements.length; i++) {
 					boolean response = false;
-					
-					if(elements[i].charAt(elements[i].length() - 1) == '$') {
+
+					if (elements[i].charAt(elements[i].length() - 1) == '$') {
 						response = true;
 						elements[i] = elements[i].substring(0, elements[i].length() - 1);
 					}
-					answers.add(new Answer(elements[i], response));
+					answers.add(new Answer(getCharForNumber(i).toLowerCase().charAt(0), elements[i], response));
 				}
-				
+
 				Question questionModel = new Question(controller, elements[0], answers);
 				questions.add(questionModel);
 			}
@@ -53,7 +54,8 @@ public class QuestionsBuilder {
 	}
 
 	/**
-	 * Lecture depuis fichier 
+	 * Lecture depuis fichier
+	 * 
 	 * @param path
 	 * @return
 	 * @throws IOException
@@ -67,6 +69,10 @@ public class QuestionsBuilder {
 			}
 		}
 		return resultStringBuilder.toString();
+	}
+
+	private static String getCharForNumber(int i) {
+		return i > 0 && i < 27 ? String.valueOf((char) (i + 64)) : null;
 	}
 
 }

@@ -6,9 +6,12 @@ public class Answer {
 	
 	private boolean isCorrect;
 	
-	public Answer(String label, boolean isCorrect) {
+	private char qchar;
+	
+	public Answer(char qchar, String label, boolean isCorrect) {
 		this.label = label;
 		this.isCorrect = isCorrect;
+		this.qchar = qchar;
 	}
 	
 	public String getLabel() {
@@ -18,5 +21,8 @@ public class Answer {
 	public boolean isCorrect() {
 		return isCorrect;
 	}
-
+	
+	public char getQchar() {
+		return qchar;
+	}
 }

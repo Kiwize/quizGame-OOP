@@ -33,7 +33,7 @@ public class Question {
 		String answersString = "";
 
 		for (Answer answer : answers) {
-			answersString += answer.getLabel() + "\n";
+			answersString += answer.getQchar() + ") " + answer.getLabel() + "\n";
 		}
 
 		boolean isValid = false;
@@ -45,9 +45,8 @@ public class Question {
 
 			//Vérifie quelle question a été choisie par le joueur. 
 			for (Answer answer : answers) {
-				char answerchar = answer.getLabel().charAt(0);
 
-				if (answerchar == response) {
+				if (answer.getQchar() == response) {
 					if (answer.isCorrect())
 						controller.getView().output("Bravo !! C'est la bonne réponse.");
 					else
