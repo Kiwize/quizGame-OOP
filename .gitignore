@@ -2,4 +2,6 @@
 .idea
 .classpath
 out/*
-
+biblio/*
+*.pdf
+doc/*
