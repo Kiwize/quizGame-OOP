@@ -86,9 +86,10 @@ public class Question {
 			for (Answer answer : answers) {
 
 				if (answer.getQchar() == response) {
-					if (answer.isCorrect())
+					if (answer.isCorrect()) {
 						controller.getView().output("Bravo !! C'est la bonne réponse.");
-					else
+						controller.getGame().addScore(difficultyLevel * 100);
+					} else
 						controller.getView().output("Dommage.. Ce n'est pas la bonne réponse..");
 
 					isValid = true;

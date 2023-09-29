@@ -1,5 +1,6 @@
 package fr.thomas.proto0.model;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -19,6 +20,30 @@ public class Player implements IModel {
 
 	public String getName() {
 		return name;
+	}
+
+	public boolean authenticate(String name) {
+		try {
+			DatabaseHelper db = new DatabaseHelper();
+
+			Statement st = db.create();
+			ResultSet set = st.executeQuery("SELECT idplayer, name FROM Player WHERE name = '" + name + "';");
+
+			if (!set.next()) {
+				System.err.println("Unknown user");
+				db.close();
+				return false;
+			} else {
+				this.id = set.getInt("idplayer");
+				this.name = set.getString("name");
+				
+				db.close();
+				return true;
+			}
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
@@ -51,5 +76,9 @@ public class Player implements IModel {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public int getID() {
+		return id;
 	}
 }
