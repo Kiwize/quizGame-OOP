@@ -29,6 +29,15 @@ public class DatabaseHelper {
 		this.con = DriverManager.getConnection(url, username, password);
 	}
 	
+	public Statement create() {
+		try {
+			return con.createStatement();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public Connection getCon() {
 		return con;
 	}
