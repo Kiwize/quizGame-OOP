@@ -8,12 +8,13 @@ import fr.thomas.proto0.model.Question;
 import fr.thomas.proto0.utils.QuestionsBuilder;
 import fr.thomas.proto0.view.ConsoleView;
 
-public class GameController extends Controller{
+public class GameController {
 
 	private ConsoleView view;
 	private Player player;
 	private ArrayList<Question> questions;
 	private Game game;
+	private int diff;
 	
 	/**
 	 * @author Thomas PRADEAU
@@ -24,15 +25,35 @@ public class GameController extends Controller{
 		
 		//Créer le joueur
 		player = new Player(view.askPlayer("Quel est votre nom ?"));
-		questions = QuestionsBuilder.readQuestions(this, "resources/data/questions.txt"); //Stubdata questions
+		diff = view.askDifficulty("Choisissez la difficulté :");
+		
+		//questions = QuestionsBuilder.readQuestions(this, "resources/data/questions.txt"); //Stubdata questions
+		questions = QuestionsBuilder.loadQuestions(this, diff);
+	
 		
 		//Créer la game avec joueur et questions
-		this.game = new Game(player, questions);
+		this.game = new Game(this);
 		game.getRandomQuestions(2); //Choisir les questions aléatoirement
 		game.begin(); 
 	}
 	
 	public ConsoleView getView() {
 		return view;
+	}
+	
+	public ArrayList<Question> getQuestions() {
+		return questions;
+	}
+	
+	public void setQuestions(ArrayList<Question> questions) {
+		this.questions = questions;
+	}
+	
+	public Player getPlayer() {
+		return player;
+	}
+	
+	public Game getGame() {
+		return game;
 	}
 }

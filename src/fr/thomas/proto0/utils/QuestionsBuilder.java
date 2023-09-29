@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import fr.thomas.proto0.controller.GameController;
@@ -12,6 +15,28 @@ import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Question;
 
 public class QuestionsBuilder {
+
+	public static ArrayList<Question> loadQuestions(GameController controller, int difficulty) {
+		try {
+			DatabaseHelper db = new DatabaseHelper();
+			ArrayList<Question> questions = new ArrayList<Question>();
+
+			Statement st = db.getCon().createStatement();
+			ResultSet res = st
+					.executeQuery("SELECT idquestion, label FROM Question WHERE difficultyLevel = " + difficulty + ";");
+
+			while (res.next()) {
+				questions.add(new Question(res.getInt("idquestion"), controller, difficulty));
+			}
+
+			db.close();
+
+			return questions;
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	/**
 	 * Stubdata des questions
@@ -71,7 +96,7 @@ public class QuestionsBuilder {
 		return resultStringBuilder.toString();
 	}
 
-	private static String getCharForNumber(int i) {
+	public static String getCharForNumber(int i) {
 		return i > 0 && i < 27 ? String.valueOf((char) (i + 64)) : null;
 	}
 

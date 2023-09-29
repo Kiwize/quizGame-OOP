@@ -3,9 +3,7 @@ package fr.thomas.proto0.model;
 public class Answer {
 	
 	private String label;
-	
 	private boolean isCorrect;
-	
 	private char qchar;
 	
 	public Answer(char qchar, String label, boolean isCorrect) {
