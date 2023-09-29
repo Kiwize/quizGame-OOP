@@ -27,7 +27,6 @@ public class GameController {
 		player = new Player(view.askPlayer("Quel est votre nom ?"), this);
 		player.insert();
 		
-		
 		diff = view.askDifficulty("Choisissez la difficulté :");
 		
 		//questions = QuestionsBuilder.readQuestions(this, "resources/data/questions.txt"); //Stubdata questions
