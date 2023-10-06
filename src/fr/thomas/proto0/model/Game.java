@@ -81,11 +81,11 @@ public class Game implements IModel {
 					Statement.RETURN_GENERATED_KEYS);
 
 			ResultSet res = st.getGeneratedKeys();
-			
+
 			if (res.next()) {
 				this.id = res.getInt(1);
 			}
-			
+
 			db.close();
 			return true;
 		} catch (ClassNotFoundException | SQLException e) {
@@ -108,6 +108,27 @@ public class Game implements IModel {
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 			return false;
+		}
+	}
+
+	public int getHighestScore(Player player) {
+		try {
+			DatabaseHelper db = new DatabaseHelper();
+			Statement st = db.create();
+			ResultSet set = st.executeQuery("SELECT Game.score FROM Game WHERE Game.idplayer = " + player.getID());
+
+			int bestScore = 0;
+
+			while (set.next()) {
+				if (bestScore < set.getInt("score"))
+					bestScore = set.getInt("score");
+			}
+
+			return bestScore;
+
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+			return -1;
 		}
 	}
 }
