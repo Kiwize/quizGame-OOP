@@ -47,7 +47,7 @@ CREATE TABLE Possess(
 
 -- Insérez quelques joueurs
 INSERT INTO Player (name, password) VALUES
-   ('Joueur 1', '$2a$10$PjVOdSx90f6xvhsbugPJrOvMXpbVRn3BQcRk01wPh3MFA7jsQ3lgy');
+   ('Joueur 1', '$2a$10$o2UumzT7fDeIQiFZfv.uJOR7U7jP6uj62PSrLjvjh4tR.b3Th4wIa');
 
 -- Insérez des jeux avec des scores pour les joueurs
 INSERT INTO Game (score, idplayer) VALUES

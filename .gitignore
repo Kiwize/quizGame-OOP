@@ -6,3 +6,4 @@ biblio/*
 doc/*
 
 /bin/
+db.env
