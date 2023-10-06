@@ -1,8 +1,7 @@
-drop table if exists Posseder;
-drop table if exists Game;
-drop table if exists Answer;
 drop table if exists Possess;
+drop table if exists Answer;
 drop table if exists Question;
+drop table if exists Game;
 drop table if exists Player;
 
 CREATE TABLE Player(
@@ -12,19 +11,21 @@ CREATE TABLE Player(
    PRIMARY KEY(idplayer)
 );
 
+CREATE TABLE Game(
+   idgame INT AUTO_INCREMENT,
+   score INT,
+   idplayer INT NOT NULL,
+   PRIMARY KEY(idgame),
+   FOREIGN KEY(idplayer) REFERENCES Player(idplayer)
+);
+
 CREATE TABLE Question(
    idquestion INT,
    difficultyLevel INT,
-   label VARCHAR(255) ,
-   PRIMARY KEY(idquestion)
-);
-
-CREATE TABLE Possess(
-   idgame INT NOT NULL,
-   idquestion INT NOT NULL,
-   FOREIGN KEY(idgame) REFERENCES Game(idgame),
-   FOREIGN KEY(idquestion) REFERENCES Question(idquestion),
-   PRIMARY KEY(idgame, idquestion)
+   label VARCHAR(255),
+   idgame INT,
+   PRIMARY KEY(idquestion),
+   FOREIGN KEY(idgame) REFERENCES Game(idgame)
 );
 
 CREATE TABLE Answer(
@@ -36,20 +37,12 @@ CREATE TABLE Answer(
    FOREIGN KEY(idquestion) REFERENCES Question(idquestion)
 );
 
-CREATE TABLE Game(
-   idgame INT AUTO_INCREMENT,
-   score INT,
-   idplayer INT NOT NULL,
-   PRIMARY KEY(idgame),
-   FOREIGN KEY(idplayer) REFERENCES Player(idplayer)
-);
-
-CREATE TABLE Posseder(
-   idgame INT,
-   idquestion INT,
-   PRIMARY KEY(idgame, idquestion),
+CREATE TABLE Possess(
+   idgame INT NOT NULL,
+   idquestion INT NOT NULL,
    FOREIGN KEY(idgame) REFERENCES Game(idgame),
-   FOREIGN KEY(idquestion) REFERENCES Question(idquestion)
+   FOREIGN KEY(idquestion) REFERENCES Question(idquestion),
+   PRIMARY KEY(idgame, idquestion)
 );
 
 -- Insérez quelques joueurs
@@ -80,5 +73,3 @@ INSERT INTO Answer (label, iscorrect, idquestion) VALUES
    ('Réponse 2 à la Question 2', 0, 2),
    ('Réponse 1 à la Question 3', 1, 3),
    ('Réponse 2 à la Question 3', 0, 3);
-
-
