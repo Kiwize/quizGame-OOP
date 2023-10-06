@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import fr.thomas.proto0.controller.GameController;
+import fr.thomas.proto0.utils.BCrypt;
 import fr.thomas.proto0.utils.DatabaseHelper;
 
 public class Player implements IModel {
@@ -36,8 +37,8 @@ public class Player implements IModel {
 				return false;
 			} else {
 				set = st.executeQuery("SELECT idplayer, name, password FROM Player WHERE name = '" + name + "';");
-				if(set.next()) {
-					if(set.getString("password").equals(password)) {
+				if (set.next()) {
+					if (BCrypt.checkpw(password, set.getString("password"))) {
 						this.id = set.getInt("idplayer");
 						this.password = set.getString("password");
 						this.name = set.getString("name");
@@ -47,7 +48,7 @@ public class Player implements IModel {
 						return false;
 					}
 				}
-				
+
 				db.close();
 				return true;
 			}
