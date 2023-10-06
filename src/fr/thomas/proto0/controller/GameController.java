@@ -27,7 +27,7 @@ public class GameController {
 		player = new Player("", this);
 
 		//TODO Add password auth
-		while (!player.authenticate(view.askPlayer("Quel est votre nom ?"))) {
+		while (!player.authenticate(view.askPlayer("Quel est votre nom ?"), view.askPlayer("Mot de passe : "))) {
 			continue;
 		}
 

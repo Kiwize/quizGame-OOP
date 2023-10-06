@@ -11,6 +11,7 @@ public class Player implements IModel {
 
 	private int id;
 	private String name;
+	private String password;
 	private GameController controller;
 
 	public Player(String name, GameController controller) {
@@ -22,7 +23,7 @@ public class Player implements IModel {
 		return name;
 	}
 
-	public boolean authenticate(String name) {
+	public boolean authenticate(String name, String password) {
 		try {
 			DatabaseHelper db = new DatabaseHelper();
 
@@ -34,8 +35,18 @@ public class Player implements IModel {
 				db.close();
 				return false;
 			} else {
-				this.id = set.getInt("idplayer");
-				this.name = set.getString("name");
+				set = st.executeQuery("SELECT idplayer, name, password FROM Player WHERE name = '" + name + "';");
+				if(set.next()) {
+					if(set.getString("password").equals(password)) {
+						this.id = set.getInt("idplayer");
+						this.password = set.getString("password");
+						this.name = set.getString("name");
+					} else {
+						System.err.println("Wrong password !");
+						db.close();
+						return false;
+					}
+				}
 				
 				db.close();
 				return true;
