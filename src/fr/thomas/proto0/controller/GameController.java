@@ -7,6 +7,7 @@ import fr.thomas.proto0.model.Player;
 import fr.thomas.proto0.model.Question;
 import fr.thomas.proto0.utils.QuestionsBuilder;
 import fr.thomas.proto0.view.ConsoleView;
+import fr.thomas.proto0.view.LoginView;
 
 public class GameController {
 
@@ -16,35 +17,41 @@ public class GameController {
 	private Game game;
 	private int diff;
 
+	private LoginView loginView;
+
 	/**
 	 * @author Thomas PRADEAU
 	 */
 	public GameController() {
 		// Créer la vue
 		this.view = new ConsoleView(this);
-
-		// Créer le joueur
+		this.loginView = new LoginView(this);
 		player = new Player("", this);
+		this.loginView.setVisible(true);
 
-		//TODO Add password auth
-		while (!player.authenticate(view.askPlayer("Quel est votre nom ?"), view.askPlayer("Mot de passe : "))) {
-			continue;
+	}
+
+	public void playerAuth(String name, String password) {
+		if (player.authenticate(name, password)) {
+			this.loginView.setVisible(false);	
+
+			diff = view.askDifficulty("Choisissez la difficulté :");
+
+			// questions = QuestionsBuilder.readQuestions(this,
+			// "resources/data/questions.txt"); //Stubdata questions
+			questions = QuestionsBuilder.loadQuestions(this, diff);
+
+			// Créer la game avec joueur et questions
+			this.game = new Game(this, player);
+			game.insert();
+
+			game.getRandomQuestions(2); // Choisir les questions aléatoirement
+			game.begin();
+
+			game.insert();
+		} else {
+			System.err.println("Invalid password...");
 		}
-
-		diff = view.askDifficulty("Choisissez la difficulté :");
-
-		// questions = QuestionsBuilder.readQuestions(this,
-		// "resources/data/questions.txt"); //Stubdata questions
-		questions = QuestionsBuilder.loadQuestions(this, diff);
-
-		// Créer la game avec joueur et questions
-		this.game = new Game(this, player);
-		game.insert();
-
-		game.getRandomQuestions(2); // Choisir les questions aléatoirement
-		game.begin();
-		
-		game.insert();
 	}
 
 	public ConsoleView getView() {
