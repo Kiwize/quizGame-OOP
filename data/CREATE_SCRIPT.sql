@@ -23,9 +23,7 @@ CREATE TABLE Question(
    idquestion INT,
    difficultyLevel INT,
    label VARCHAR(255),
-   idgame INT,
    PRIMARY KEY(idquestion),
-   FOREIGN KEY(idgame) REFERENCES Game(idgame)
 );
 
 CREATE TABLE Answer(
