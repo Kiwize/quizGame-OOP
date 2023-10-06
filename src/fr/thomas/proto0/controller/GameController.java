@@ -51,17 +51,15 @@ public class GameController {
 		diff = view.askDifficulty("Choisissez la difficulté :");
 		questions = QuestionsBuilder.loadQuestions(this, diff);
 
-		//TODO Déduire nb de questions choisies aleatoirement
+		// TODO Déduire nb de questions choisies aleatoirement
 		game.getRandomQuestions(2); // Choisir les questions aléatoirement
 		game.begin();
 
-		//Partie terminee
-		
+		// Partie terminee
+
 		game.insert();
 		this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
 	}
-	
-	
 
 	public ConsoleView getView() {
 		return view;

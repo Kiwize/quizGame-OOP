@@ -23,7 +23,7 @@ CREATE TABLE Question(
    idquestion INT,
    difficultyLevel INT,
    label VARCHAR(255),
-   PRIMARY KEY(idquestion),
+   PRIMARY KEY(idquestion)
 );
 
 CREATE TABLE Answer(
@@ -52,10 +52,10 @@ INSERT INTO Game (score, idplayer) VALUES
    (100, 1);
 
 -- Insérez 20 questions avec différentes difficultés pour les jeux
-INSERT INTO Question (idquestion, difficultyLevel, label, idgame) VALUES
-   (1, 1, 'Question 1 (Facile) - Jeu 1', 1),
-   (2, 2, 'Question 2 (Moyenne) - Jeu 1', 1),
-   (3, 3, 'Question 3 (Difficile) - Jeu 1', 1);
+INSERT INTO Question (idquestion, difficultyLevel, label) VALUES
+   (1, 1, 'Question 1 (Facile) - Jeu 1'),
+   (2, 2, 'Question 2 (Moyenne) - Jeu 1'),
+   (3, 3, 'Question 3 (Difficile) - Jeu 1');
 
 
 INSERT INTO Possess (idgame, idquestion) VALUES
