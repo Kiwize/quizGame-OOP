@@ -16,6 +16,8 @@ public class HomeView extends JFrame {
 	private JLabel usernameLabel;
 	private JLabel scoreLabel;
 
+	private JButton playButton;
+	
 	public HomeView(GameController controller) {
 		getContentPane().setLayout(null);
 
@@ -37,15 +39,15 @@ public class HomeView extends JFrame {
 		getContentPane().add(lblUsername);
 		this.usernameLabel = lblUsername;
 
-		JButton btnJoueur = new JButton("Jouer");
-		btnJoueur.addMouseListener(new MouseAdapter() {
+		playButton = new JButton("Jouer");
+		playButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				controller.startGame();
 			}
 		});
-		btnJoueur.setBounds(140, 178, 105, 27);
-		getContentPane().add(btnJoueur);
+		playButton.setBounds(140, 178, 105, 27);
+		getContentPane().add(playButton);
 		setSize(400, 300);
 		this.controller = controller;
 	}
@@ -56,5 +58,9 @@ public class HomeView extends JFrame {
 	}
 
 	private static final long serialVersionUID = -912987546852985245L;
+
+	public void setPlayButtonState(boolean state) {
+		playButton.setEnabled(state);
+	}
 
 }

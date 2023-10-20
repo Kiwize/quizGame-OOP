@@ -34,9 +34,8 @@ public class Game implements IModel {
 	 * @author Thomas PRADEAU
 	 */
 	public void begin() {
-		for (Question question : controller.getQuestions()) {
-			question.ask();
-		}
+		this.controller.getPlayView().setVisible(true);
+		this.controller.getPlayView().loadUIQuestions(controller.getQuestions());
 	}
 
 	public void addScore(int amount) {
@@ -52,7 +51,6 @@ public class Game implements IModel {
 	public void getRandomQuestions() {
 		// DIFFICULTY : 1 = 5 Questions / 2 = 10 Questions / 3 = 30 Questions.
 		ArrayList<Question> cq = new ArrayList<Question>();
-
 		DatabaseHelper db;
 		try {
 			db = new DatabaseHelper();

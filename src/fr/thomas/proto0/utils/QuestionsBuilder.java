@@ -16,7 +16,7 @@ import fr.thomas.proto0.model.Question;
 
 public class QuestionsBuilder {
 
-	public static ArrayList<Question> loadQuestions(GameController controller, int difficulty) {
+	public static ArrayList<Question> loadQuestions(GameController controller) {
 		try {
 			DatabaseHelper db = new DatabaseHelper();
 			ArrayList<Question> questions = new ArrayList<Question>();

@@ -1,17 +1,16 @@
 package fr.thomas.proto0.controller;
 
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Game;
 import fr.thomas.proto0.model.Player;
 import fr.thomas.proto0.model.Question;
-import fr.thomas.proto0.utils.DatabaseHelper;
-import fr.thomas.proto0.utils.QuestionsBuilder;
 import fr.thomas.proto0.view.ConsoleView;
 import fr.thomas.proto0.view.HomeView;
 import fr.thomas.proto0.view.LoginView;
+import fr.thomas.proto0.view.PlayView;
 
 public class GameController {
 
@@ -23,6 +22,9 @@ public class GameController {
 
 	private LoginView loginView;
 	private HomeView homeView;
+	private PlayView playView;
+
+	private boolean isGameStarted = false;
 
 	/**
 	 * @author Thomas PRADEAU
@@ -34,6 +36,7 @@ public class GameController {
 		player = new Player("", this);
 		this.homeView = new HomeView(this);
 		this.loginView.setVisible(true);
+		this.playView = new PlayView(this);
 	}
 
 	public void playerAuth(String name, String password) {
@@ -48,17 +51,32 @@ public class GameController {
 	}
 
 	public void startGame() {
-		diff = view.askDifficulty("Choisissez la difficulté :");
-		questions = QuestionsBuilder.loadQuestions(this, diff);
+		if (!isGameStarted) {
+			game.getRandomQuestions(); // Choisir les questions aléatoirement
+			game.begin();
+			isGameStarted = true;
+			homeView.setPlayButtonState(false);
+			homeView.setVisible(false);
+			homeView.revalidate();
+			homeView.repaint();
 
-		// TODO Déduire nb de questions choisies aleatoirement
-		game.getRandomQuestions(); // Choisir les questions aléatoirement
-		game.begin();
+			// Partie terminee
+			game.insert();
+			this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
+		}
+	}
 
-		// Partie terminee
+	public void finishGame(HashMap<Question, Answer> gameHistory) {
+		// TODO Show recap view
+		isGameStarted = false;
+		homeView.setPlayButtonState(true);
+		homeView.setVisible(true);
+		homeView.revalidate();
+		homeView.repaint();
 
-		game.insert();
-		this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
+		playView.setVisible(false);
+
+		view.showGameRecap(gameHistory);
 	}
 
 	public ConsoleView getView() {
@@ -80,4 +98,9 @@ public class GameController {
 	public Game getGame() {
 		return game;
 	}
+
+	public PlayView getPlayView() {
+		return playView;
+	}
+
 }
