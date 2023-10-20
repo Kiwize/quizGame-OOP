@@ -22,11 +22,10 @@ public class QuestionsBuilder {
 			ArrayList<Question> questions = new ArrayList<Question>();
 
 			Statement st = db.getCon().createStatement();
-			ResultSet res = st
-					.executeQuery("SELECT idquestion, label FROM Question WHERE difficultyLevel = " + difficulty + ";");
+			ResultSet res = st.executeQuery("SELECT idquestion, label FROM Question ;");
 
 			while (res.next()) {
-				questions.add(new Question(res.getInt("idquestion"), controller, difficulty));
+				questions.add(new Question(res.getInt("idquestion"), controller));
 			}
 
 			db.close();

@@ -52,7 +52,7 @@ public class GameController {
 		questions = QuestionsBuilder.loadQuestions(this, diff);
 
 		// TODO Déduire nb de questions choisies aleatoirement
-		game.getRandomQuestions(2); // Choisir les questions aléatoirement
+		game.getRandomQuestions(); // Choisir les questions aléatoirement
 		game.begin();
 
 		// Partie terminee
