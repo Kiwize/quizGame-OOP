@@ -1,8 +1,12 @@
 package fr.thomas.proto0.view;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import fr.thomas.proto0.controller.GameController;
+import fr.thomas.proto0.model.Answer;
+import fr.thomas.proto0.model.Question;
 
 public class ConsoleView {
 
@@ -43,6 +47,13 @@ public class ConsoleView {
 			return 2;
 		case 3:
 			return 3;
+		}
+	}
+	
+	public void showGameRecap(HashMap<Question, Answer> gameHistory) {
+		for(Map.Entry<Question, Answer> history : gameHistory.entrySet()) {
+			System.out.println("Question : " + history.getKey().getLabel());
+			System.out.println("Réponse : " + history.getValue().getLabel() + "\n");
 		}
 	}
 

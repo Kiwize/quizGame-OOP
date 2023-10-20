@@ -23,12 +23,12 @@ public class Question {
 		this.controller = controller;
 	}
 
-	public Question(int id, GameController controller, int diff) {
+	public Question(int id, GameController controller) {
 		try {
 			DatabaseHelper db = new DatabaseHelper();
 
 			Statement st = db.getCon().createStatement();
-			ResultSet res = st.executeQuery("SELECT * FROM Question WHERE difficultyLevel = " + diff + ";");
+			ResultSet res = st.executeQuery("SELECT * FROM Question WHERE idquestion = " + id + ";");
 			this.controller = controller;
 			if (!res.next()) {
 				this.id = 0;
