@@ -100,4 +100,8 @@ public class Question {
 			controller.getView().output("Réponse invalide, veuillez réessayer...");
 		}
 	}
+
+	public int getDifficulty() {
+		return difficultyLevel;
+	}
 }
