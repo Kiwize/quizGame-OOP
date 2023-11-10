@@ -31,7 +31,7 @@ public class Question {
 			ResultSet res = st.executeQuery("SELECT * FROM Question WHERE idquestion = " + id + ";");
 			this.controller = controller;
 			if (!res.next()) {
-				this.id = 0;
+				this.id = -1;
 				this.label = "";
 				this.difficultyLevel = 0;
 				this.answers = new ArrayList<Answer>();
@@ -60,6 +60,10 @@ public class Question {
 	public ArrayList<Answer> getAnswers() {
 		return answers;
 	}
+	
+	public String getAnAnswer(int id) {
+		return answers.get(id).getLabel();
+	}
 
 	public String getLabel() {
 		return label;
@@ -77,12 +81,12 @@ public class Question {
 
 		boolean isValid = false;
 
-		// Temps que la réponse choisie par le joueur n'est pas valide.
+		// Tant que la réponse choisie par le joueur n'est pas valide.
 		while (!isValid) {
 			char response = controller.getView().askPlayer(label + "\n" + answersString).charAt(0);
 			controller.getView().output("Vous avez répondu : " + response);
 
-			// Vérifie quelle question a été choisie par le joueur.
+			// Vérifie quelle réponse a été choisie par le joueur.
 			for (Answer answer : answers) {
 
 				if (answer.getQchar() == response) {

@@ -1,13 +1,11 @@
 package fr.thomas.proto0.utils;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import fr.thomas.proto0.controller.GameController;
 
 public class DatabaseHelper {
 
@@ -16,35 +14,18 @@ public class DatabaseHelper {
 	private String url = "";
 	private String username = "";
 	private String password = "";
+	private GameController myController;
 
 	private Connection con;
 
 	public DatabaseHelper() throws ClassNotFoundException, SQLException {
 
-		BufferedReader reader;
-		String cdx = "";
+		this.myController = new GameController();
 		
-		try {
-			reader = new BufferedReader(new FileReader("resources/data/db.env"));
-			String line = reader.readLine();
-
-			while (line != null) {
-				cdx += line + ";";
-				line = reader.readLine();
-			}
-
-			reader.close();
-		} catch (IOException e) {
-			System.err.println("Database configuration file 'ressources/data/db.env' is missing !");
-			System.exit(-1);
-		} 
-
-		String[] arrc = cdx.split(";");
-		
-		bdname = arrc[0];
-		url = arrc[1];
-		username = arrc[2];
-		password = arrc[3];
+		bdname = myController.getMyConfig().readAParam("db.name");
+		url = myController.getMyConfig().readAParam("db.url");
+		username = myController.getMyConfig().readAParam("db.username");
+		password = myController.getMyConfig().decryptAParam("db.password");
 		
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");

@@ -19,6 +19,7 @@ public class GameController {
 	private ArrayList<Question> questions;
 	private Game game;
 	private int diff;
+	private Config myConfig;
 
 	private LoginView loginView;
 	private HomeView homeView;
@@ -31,6 +32,7 @@ public class GameController {
 	 */
 	public GameController() {
 		// Créer la vue
+		this.myConfig = new Config();
 		this.view = new ConsoleView(this);
 		this.loginView = new LoginView(this);
 		player = new Player("", this);
@@ -103,4 +105,11 @@ public class GameController {
 		return playView;
 	}
 
+	public Config getMyConfig() {
+		return myConfig;
+	}
+
+	public void setMyConfig(Config myConfig) {
+		this.myConfig = myConfig;
+	}
 }
