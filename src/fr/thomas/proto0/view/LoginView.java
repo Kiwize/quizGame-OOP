@@ -1,13 +1,14 @@
 package fr.thomas.proto0.view;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import fr.thomas.proto0.controller.GameController;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class LoginView extends JFrame{
 	
@@ -44,8 +45,19 @@ public class LoginView extends JFrame{
 				controller.playerAuth(usernameTextfield.getText(), passwordTextfield.getText());
 			}
 		});
-		btnLogin.setBounds(159, 133, 105, 27);
+		btnLogin.setBounds(226, 133, 105, 27);
 		getContentPane().add(btnLogin);
+		
+		final JButton btnChangePassword = new JButton("Changer MDP");
+		btnChangePassword.setLocation(86, 131);
+		btnChangePassword.setSize(120, 30);
+		btnChangePassword.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				controller.submitPasswordChange(usernameTextfield.getText(), passwordTextfield.getText());
+			}
+		});
+		getContentPane().add(btnChangePassword);
 	}
 	
 	private static final long serialVersionUID = -2228161448011267735L;

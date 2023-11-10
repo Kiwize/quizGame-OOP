@@ -2,11 +2,9 @@ package fr.thomas.proto0.view;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;

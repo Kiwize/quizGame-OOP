@@ -58,6 +58,20 @@ public class Player implements IModel {
 		}
 	}
 
+	public boolean updatePassword(String newPassword) {
+		final String encrypted = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+		try {
+			DatabaseHelper db = new DatabaseHelper();
+			Statement st = db.create();
+			st.execute("UPDATE Player SET Player.password = '" + encrypted + "' WHERE Player.idplayer = " + id + ";");
+
+			return true;
+		} catch (final SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	@Override
 	public boolean insert() {
 		try {
