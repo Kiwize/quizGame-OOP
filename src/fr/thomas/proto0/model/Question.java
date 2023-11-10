@@ -6,7 +6,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import fr.thomas.proto0.controller.GameController;
-import fr.thomas.proto0.utils.DatabaseHelper;
 import fr.thomas.proto0.utils.QuestionsBuilder;
 
 public class Question {
@@ -25,9 +24,7 @@ public class Question {
 
 	public Question(int id, GameController controller) {
 		try {
-			DatabaseHelper db = new DatabaseHelper();
-
-			Statement st = db.getCon().createStatement();
+			Statement st = controller.getDatabaseHelper().getStatement(0);
 			ResultSet res = st.executeQuery("SELECT * FROM Question WHERE idquestion = " + id + ";");
 			this.controller = controller;
 			if (!res.next()) {
@@ -51,8 +48,7 @@ public class Question {
 				}
 			}
 
-			db.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
