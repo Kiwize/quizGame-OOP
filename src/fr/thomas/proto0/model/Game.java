@@ -33,12 +33,17 @@ public class Game implements IModel {
 	 * @author Thomas PRADEAU
 	 */
 	public void begin() {
+		this.controller.getPlayView().resetPointer();
 		this.controller.getPlayView().setVisible(true);
 		this.controller.getPlayView().loadUIQuestions(controller.getQuestions());
 	}
 
 	public void addScore(int amount) {
 		score += amount;
+	}
+	
+	public void setScore(int amount) {
+		score = amount;
 	}
 
 	/**
@@ -141,8 +146,9 @@ public class Game implements IModel {
 
 			int bestScore = 0;
 
-			while (set.next() && bestScore < set.getInt("score")) {
-				bestScore = set.getInt("score");
+			while (set.next()) {
+				if (bestScore < set.getInt("score"))
+					bestScore = set.getInt("score");
 			}
 
 			return bestScore;

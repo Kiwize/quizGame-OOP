@@ -38,6 +38,9 @@ public class PlayView extends JFrame {
 
 	private HashMap<Question, ButtonGroup> answerButtonMap;
 	private HashMap<Question, Answer> gameHistory;
+	
+	private static final long serialVersionUID = -6452443507319459902L;
+	private JButton submitButton;
 
 	public PlayView(GameController controller) {
 		this.controller = controller;
@@ -89,7 +92,7 @@ public class PlayView extends JFrame {
 		nextButton.setBounds(122, 329, 105, 27);
 		getContentPane().add(nextButton);
 
-		prevButton = new JButton("Précédant");
+		prevButton = new JButton("Précédent");
 		prevButton.setEnabled(false);
 		prevButton.addMouseListener(new MouseAdapter() {
 			@Override
@@ -179,8 +182,14 @@ public class PlayView extends JFrame {
 
 			questionAnswersPanel.add(button);
 		}
+		
+		questionLabel.setText(question.getLabel());
 	}
 
-	private static final long serialVersionUID = -6452443507319459902L;
-	private JButton submitButton;
+	/**
+	 * Resets question pointer
+	 */
+	public void resetPointer() {
+		qpointer = 0;
+	}
 }

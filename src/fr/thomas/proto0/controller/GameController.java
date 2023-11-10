@@ -4,6 +4,7 @@ import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 
@@ -31,7 +32,7 @@ import fr.thomas.proto0.view.PlayView;
 public class GameController {
 
 	private DatabaseHelper databaseHelper;
-	
+
 	private ConsoleView view;
 	private Player player;
 	private ArrayList<Question> questions;
@@ -56,7 +57,7 @@ public class GameController {
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		// Créer la vue
 		this.view = new ConsoleView(this);
 		this.loginView = new LoginView(this);
@@ -90,15 +91,13 @@ public class GameController {
 		if (!isGameStarted) {
 			game.getRandomQuestions(); // Choisir les questions aléatoirement
 			game.begin();
+			playView.revalidate();
+			playView.repaint();
 			isGameStarted = true;
 			homeView.setPlayButtonState(false);
 			homeView.setVisible(false);
 			homeView.revalidate();
 			homeView.repaint();
-
-			// Partie terminee
-			game.insert();
-			this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
 		}
 	}
 
@@ -111,6 +110,18 @@ public class GameController {
 		homeView.repaint();
 
 		playView.setVisible(false);
+
+		int gameScoreBuffer = 0;
+
+		for (Map.Entry<Question, Answer> gameEntry : gameHistory.entrySet()) {
+			if (gameEntry.getValue().isCorrect()) {
+				gameScoreBuffer += gameEntry.getKey().getDifficulty() * 100;
+			}
+		}
+
+		game.setScore(gameScoreBuffer);
+		game.insert();
+		this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
 
 		view.showGameRecap(gameHistory);
 	}
@@ -223,7 +234,7 @@ public class GameController {
 	public PlayView getPlayView() {
 		return playView;
 	}
-	
+
 	public DatabaseHelper getDatabaseHelper() {
 		return databaseHelper;
 	}
