@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 
 import fr.thomas.proto0.controller.GameController;
-import fr.thomas.proto0.utils.DatabaseHelper;
 
 public class Game implements IModel {
 
@@ -51,11 +50,9 @@ public class Game implements IModel {
 	public void getRandomQuestions() {
 		// DIFFICULTY : 1 = 5 Questions / 2 = 10 Questions / 3 = 30 Questions.
 		ArrayList<Question> cq = new ArrayList<Question>();
-		DatabaseHelper db;
 		try {
-			db = new DatabaseHelper();
 
-			Statement st = db.create();
+			Statement st = controller.getDatabaseHelper().getStatement(0);
 			int count = 0;
 			ResultSet set = st.executeQuery("SELECT Count(*) as total FROM Question;");
 			if (set.next()) {
@@ -82,7 +79,7 @@ public class Game implements IModel {
 			sqlParams += "?";
 
 			String query = "SELECT idquestion, label FROM Question WHERE idquestion IN (" + sqlParams + ")";
-			PreparedStatement ps = db.getCon().prepareStatement(query);
+			PreparedStatement ps = controller.getDatabaseHelper().getCon().prepareStatement(query);
 			for (int i = 1; i <= qcount; i++) {
 				ps.setInt(i, selectedQuestions.get(i - 1));
 			}
@@ -96,7 +93,7 @@ public class Game implements IModel {
 
 			controller.setQuestions(cq);
 
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
@@ -104,8 +101,7 @@ public class Game implements IModel {
 	@Override
 	public boolean insert() {
 		try {
-			DatabaseHelper db = new DatabaseHelper();
-			Statement st = db.create();
+			Statement st = controller.getDatabaseHelper().getStatement(0);
 
 			st.executeUpdate("INSERT INTO Game (score, idplayer) VALUES ('" + score + "', " + player.getID() + ");",
 					Statement.RETURN_GENERATED_KEYS);
@@ -116,9 +112,8 @@ public class Game implements IModel {
 				this.id = res.getInt(1);
 			}
 
-			db.close();
 			return true;
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -127,15 +122,13 @@ public class Game implements IModel {
 	@Override
 	public boolean save() {
 		try {
-			DatabaseHelper db = new DatabaseHelper();
-			Statement st = db.create();
+			Statement st = controller.getDatabaseHelper().getStatement(0);
 
 			boolean res = st.execute("UPDATE Game SET score = " + score + ", idplayer=" + player.getID()
 					+ " WHERE Game.idgame=" + id + ";");
-			db.close();
 
 			return res;
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -143,20 +136,17 @@ public class Game implements IModel {
 
 	public int getHighestScore(Player player) {
 		try {
-			DatabaseHelper db = new DatabaseHelper();
-			Statement st = db.create();
+			Statement st = controller.getDatabaseHelper().getStatement(0);
 			ResultSet set = st.executeQuery("SELECT Game.score FROM Game WHERE Game.idplayer = " + player.getID());
 
 			int bestScore = 0;
 
-			while (set.next()) {
-				if (bestScore < set.getInt("score"))
-					bestScore = set.getInt("score");
+			while (set.next() && bestScore < set.getInt("score")) {
+				bestScore = set.getInt("score");
 			}
 
 			return bestScore;
-
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return -1;
 		}

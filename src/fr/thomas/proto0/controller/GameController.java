@@ -1,6 +1,7 @@
 package fr.thomas.proto0.controller;
 
 import java.awt.event.WindowEvent;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -20,6 +21,7 @@ import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Game;
 import fr.thomas.proto0.model.Player;
 import fr.thomas.proto0.model.Question;
+import fr.thomas.proto0.utils.DatabaseHelper;
 import fr.thomas.proto0.view.ConsoleView;
 import fr.thomas.proto0.view.HomeView;
 import fr.thomas.proto0.view.LoginView;
@@ -28,6 +30,8 @@ import fr.thomas.proto0.view.PlayView;
 
 public class GameController {
 
+	private DatabaseHelper databaseHelper;
+	
 	private ConsoleView view;
 	private Player player;
 	private ArrayList<Question> questions;
@@ -48,6 +52,12 @@ public class GameController {
 	 * @author Thomas PRADEAU
 	 */
 	public GameController() {
+		try {
+			this.databaseHelper = new DatabaseHelper();
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+		
 		// Créer la vue
 		this.myConfig = new Config();
 		this.view = new ConsoleView(this);
@@ -214,6 +224,10 @@ public class GameController {
 
 	public PlayView getPlayView() {
 		return playView;
+	}
+	
+	public DatabaseHelper getDatabaseHelper() {
+		return databaseHelper;
 	}
 
 	/**
