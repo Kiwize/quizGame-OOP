@@ -53,14 +53,16 @@ public class GameController {
 	 * @author Thomas PRADEAU
 	 */
 	public GameController() {
+	
+		// Créer la vue
+		this.myConfig = new Config();
+		
 		try {
-			this.databaseHelper = new DatabaseHelper();
+			this.databaseHelper = new DatabaseHelper(this);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
-
-		// Créer la vue
-		this.myConfig = new Config();
+		
 		this.view = new ConsoleView(this);
 		this.loginView = new LoginView(this);
 		player = new Player("", this);

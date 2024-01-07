@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import fr.thomas.proto0.controller.GameController;
@@ -16,6 +13,7 @@ import fr.thomas.proto0.model.Question;
 
 public class QuestionsBuilder {
 
+	/**
 	public static ArrayList<Question> loadQuestions(GameController controller) {
 		try {
 			DatabaseHelper db = new DatabaseHelper();

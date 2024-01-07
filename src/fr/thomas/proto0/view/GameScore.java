@@ -1,19 +1,18 @@
 package fr.thomas.proto0.view;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
-import javax.swing.ScrollPaneConstants;
-
+import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
+
 import fr.thomas.proto0.controller.GameController;
-import java.awt.Font;
 
 public class GameScore extends JFrame {
 

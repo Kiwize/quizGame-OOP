@@ -22,9 +22,9 @@ public class DatabaseHelper {
 	private final int ACTIVE_STATEMENT_COUNT = 2;
 	private ArrayList<Statement> activeStatements;
 
-	public DatabaseHelper() throws ClassNotFoundException, SQLException {
-
-		this.myController = new GameController();
+	public DatabaseHelper(GameController controller) throws ClassNotFoundException, SQLException {
+		
+		myController = controller;
 		
 		bdname = myController.getMyConfig().readAParam("db.name");
 		url = myController.getMyConfig().readAParam("db.url");

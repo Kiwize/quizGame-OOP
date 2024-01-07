@@ -38,7 +38,7 @@ public class PlayView extends JFrame {
 
 	private HashMap<Question, ButtonGroup> answerButtonMap;
 	private HashMap<Question, Answer> gameHistory;
-	
+
 	private static final long serialVersionUID = -6452443507319459902L;
 	private JButton submitButton;
 
@@ -182,7 +182,7 @@ public class PlayView extends JFrame {
 
 			questionAnswersPanel.add(button);
 		}
-		
+
 		questionLabel.setText(question.getLabel());
 	}
 
