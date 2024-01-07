@@ -1,0 +1,4 @@
+Quelle année sommes-nous ?|2023$|2022|2021|2050
+Le capybara est-il un insecte ?|Vrai|Faux$|Chaussures
+Le Java est... ?|Un language de programmation$|Une île
+En SQL|SELECT FROM$|FROM SELECT

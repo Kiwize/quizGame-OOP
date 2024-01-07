@@ -2,4 +2,8 @@
 .idea
 .classpath
 out/*
+biblio/*
+doc/*
 
+/bin/
+db.env
