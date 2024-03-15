@@ -18,8 +18,6 @@ public class Config {
 		this.theEncryptor = new BasicTextEncryptor();
 		this.theEncryptor.setPassword("P@ssw0rd");
 		
-		System.out.println(theEncryptor.encrypt("dev"));
-		
 		this.theConfig = new Properties();
 		
 		try (FileInputStream input = new FileInputStream("./data/sbcg.cfg")){

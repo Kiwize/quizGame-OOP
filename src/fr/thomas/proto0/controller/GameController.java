@@ -1,6 +1,7 @@
 package fr.thomas.proto0.controller;
 
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,18 +19,30 @@ import org.passay.PasswordValidator;
 import org.passay.RuleResult;
 import org.passay.WhitespaceRule;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+
 import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Game;
 import fr.thomas.proto0.model.Player;
 import fr.thomas.proto0.model.Question;
+import fr.thomas.proto0.net.Login;
+import fr.thomas.proto0.net.response.ILoginResponse;
 import fr.thomas.proto0.utils.DatabaseHelper;
 import fr.thomas.proto0.view.ConsoleView;
+import fr.thomas.proto0.view.GameScore;
 import fr.thomas.proto0.view.HomeView;
 import fr.thomas.proto0.view.LoginView;
 import fr.thomas.proto0.view.PasswordChangeView;
 import fr.thomas.proto0.view.PlayView;
 
 public class GameController {
+
+	// Server com stuff
+	private Client client;
+	private Kryo kryo;
 
 	private DatabaseHelper databaseHelper;
 
@@ -44,25 +57,56 @@ public class GameController {
 	private HomeView homeView;
 	private PlayView playView;
 	private PasswordChangeView passchView;
+	private GameScore gameScoreView;
 
 	private boolean isGameStarted = false;
 
 	private PasswordValidator passwordValidator;
 
+	private ILoginResponse loginResponseCallback;
+
 	/**
 	 * @author Thomas PRADEAU
 	 */
 	public GameController() {
-	
+		client = new Client();
+		kryo = client.getKryo();
+		kryo.register(Login.LoginRequest.class);
+		kryo.register(Login.LoginResponse.class);
+
 		// Créer la vue
 		this.myConfig = new Config();
-		
+
 		try {
 			this.databaseHelper = new DatabaseHelper(this);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
-		
+
+		client.start();
+
+		try {
+			client.connect(5000, "192.0.0.1", 54555, 54777);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} // Timeout, IP, TCP port, UDP port
+
+		client.addListener(new Listener() {
+			public void received(Connection connection, Object object) {
+				if (object instanceof Login.LoginResponse) {
+					Login.LoginResponse rcv_msg = (Login.LoginResponse) object;
+
+					loginResponseCallback = new ILoginResponse() {
+
+						@Override
+						public boolean onLoginResponse() {
+							return rcv_msg.isConnected;
+						}
+					};
+				}
+			}
+		});
+
 		this.view = new ConsoleView(this);
 		this.loginView = new LoginView(this);
 		player = new Player("", this);
@@ -81,17 +125,41 @@ public class GameController {
 	}
 
 	public void playerAuth(String name, String password) {
-		if (player.authenticate(name, password)) {
-			this.loginView.setVisible(false);
-			this.homeView.setVisible(true);
-			this.game = new Game(this, player);
-			this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
-		} else {
-			System.err.println("Invalid password...");
+		Login.LoginRequest request = new Login.LoginRequest();
+		request.username = name;
+		request.password = password;
+		client.sendTCP(request);
+
+		long startTime = System.currentTimeMillis();
+		long currentTime;
+
+		while (loginResponseCallback == null) {
+			System.out.println("Waiting for server response.");
+			currentTime = System.currentTimeMillis();
+
+			if (currentTime - startTime > 3000) {
+				System.err.println("Server unreachable, please try again...");
+				break;
+			}
+		}
+
+		try {
+			if (loginResponseCallback.onLoginResponse()) {
+				this.loginView.setVisible(false);
+				this.homeView.setVisible(true);
+				this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
+			} else {
+				System.err.println("Invalid password...");
+			}
+		} catch (NullPointerException ex) {
+			System.err.println("Callback is null");
 		}
 	}
 
 	public void startGame() {
+		this.game = new Game(this, player);
+		this.playView = new PlayView(this);
+		this.gameScoreView = new GameScore(this);
 		if (!isGameStarted) {
 			game.getRandomQuestions(); // Choisir les questions aléatoirement
 			game.begin();
@@ -125,9 +193,12 @@ public class GameController {
 
 		game.setScore(gameScoreBuffer);
 		game.insert();
-		this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
+		this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
 
-		view.showGameRecap(gameHistory);
+		// view.showGameRecap(gameHistory);
+		gameScoreView.setGameHistory(gameHistory);
+		gameScoreView.setVisible(true);
+
 	}
 
 	/**
@@ -138,13 +209,12 @@ public class GameController {
 	 * @param password
 	 */
 	public void submitPasswordChange(String username, String password) {
-		if (player.authenticate(username, password)) {
-			loginView.setVisible(false);
-			passchView.setVisible(true);
-		} else {
-			JOptionPane.showMessageDialog(loginView.getComponent(0), "Identifiants invalides.", "Erreur",
-					JOptionPane.ERROR_MESSAGE);
-		}
+		/*
+		 * if (player.authenticate(username, password)) { loginView.setVisible(false);
+		 * passchView.setVisible(true); } else {
+		 * JOptionPane.showMessageDialog(loginView.getComponent(0),
+		 * "Identifiants invalides.", "Erreur", JOptionPane.ERROR_MESSAGE); }
+		 */
 	}
 
 	public void changePassword(String password, String confirm) {
@@ -165,8 +235,7 @@ public class GameController {
 				loginView.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
 				passchView.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
 				homeView.setVisible(true);
-				this.game = new Game(this, player);
-				this.homeView.updatePlayerData(player.getName(), game.getHighestScore(player));
+				this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
 			}
 		} else {
 			JOptionPane.showMessageDialog(loginView.getComponent(0), "Les mots de passe sont différents !", "Erreur",

@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import fr.thomas.proto0.controller.GameController;
@@ -19,6 +20,7 @@ public class LoginView extends JFrame{
 		setSize(400, 300);
 		getContentPane().setLayout(null);
 		this.controller = controller;
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		
 		JLabel lblUsername = new JLabel("Username");
 		lblUsername.setBounds(73, 59, 83, 17);
@@ -33,7 +35,7 @@ public class LoginView extends JFrame{
 		getContentPane().add(usernameTextfield);
 		usernameTextfield.setColumns(10);
 		
-		passwordTextfield = new JTextField();
+		passwordTextfield = new JPasswordField();
 		passwordTextfield.setBounds(159, 86, 114, 21);
 		getContentPane().add(passwordTextfield);
 		passwordTextfield.setColumns(10);

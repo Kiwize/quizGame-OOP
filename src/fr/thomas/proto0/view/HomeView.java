@@ -20,6 +20,7 @@ public class HomeView extends JFrame {
 	
 	public HomeView(GameController controller) {
 		getContentPane().setLayout(null);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JLabel lblBestScore = new JLabel("Meilleur score : ");
 		lblBestScore.setBounds(12, 12, 115, 17);

@@ -139,22 +139,5 @@ public class Game implements IModel {
 		}
 	}
 
-	public int getHighestScore(Player player) {
-		try {
-			Statement st = controller.getDatabaseHelper().getStatement(0);
-			ResultSet set = st.executeQuery("SELECT Game.score FROM Game WHERE Game.idplayer = " + player.getID());
-
-			int bestScore = 0;
-
-			while (set.next()) {
-				if (bestScore < set.getInt("score"))
-					bestScore = set.getInt("score");
-			}
-
-			return bestScore;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return -1;
-		}
-	}
+	
 }
