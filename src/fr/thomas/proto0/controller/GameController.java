@@ -1,7 +1,6 @@
 package fr.thomas.proto0.controller;
 
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,17 +18,13 @@ import org.passay.PasswordValidator;
 import org.passay.RuleResult;
 import org.passay.WhitespaceRule;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener;
-
 import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Game;
 import fr.thomas.proto0.model.Player;
 import fr.thomas.proto0.model.Question;
 import fr.thomas.proto0.net.Login;
-import fr.thomas.proto0.net.response.ILoginResponse;
+import fr.thomas.proto0.net.object.PlayerNetObject;
+import fr.thomas.proto0.net.threading.NetworkThread;
 import fr.thomas.proto0.utils.DatabaseHelper;
 import fr.thomas.proto0.view.ConsoleView;
 import fr.thomas.proto0.view.GameScore;
@@ -39,10 +34,6 @@ import fr.thomas.proto0.view.PasswordChangeView;
 import fr.thomas.proto0.view.PlayView;
 
 public class GameController {
-
-	// Server com stuff
-	private Client client;
-	private Kryo kryo;
 
 	private DatabaseHelper databaseHelper;
 
@@ -63,49 +54,28 @@ public class GameController {
 
 	private PasswordValidator passwordValidator;
 
-	private ILoginResponse loginResponseCallback;
+	private NetworkThread netthread;
+	private Thread networkThread;
 
 	/**
 	 * @author Thomas PRADEAU
 	 */
 	public GameController() {
-		client = new Client();
-		kryo = client.getKryo();
-		kryo.register(Login.LoginRequest.class);
-		kryo.register(Login.LoginResponse.class);
 
 		// Créer la vue
 		this.myConfig = new Config();
+
+		// Start client
+		this.netthread = new NetworkThread();
+		networkThread = new Thread(netthread);
+		networkThread.setName("network_thread");
+		networkThread.start();
 
 		try {
 			this.databaseHelper = new DatabaseHelper(this);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
-
-		client.start();
-
-		try {
-			client.connect(5000, "192.0.0.1", 54555, 54777);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} // Timeout, IP, TCP port, UDP port
-
-		client.addListener(new Listener() {
-			public void received(Connection connection, Object object) {
-				if (object instanceof Login.LoginResponse) {
-					Login.LoginResponse rcv_msg = (Login.LoginResponse) object;
-
-					loginResponseCallback = new ILoginResponse() {
-
-						@Override
-						public boolean onLoginResponse() {
-							return rcv_msg.isConnected;
-						}
-					};
-				}
-			}
-		});
 
 		this.view = new ConsoleView(this);
 		this.loginView = new LoginView(this);
@@ -128,31 +98,27 @@ public class GameController {
 		Login.LoginRequest request = new Login.LoginRequest();
 		request.username = name;
 		request.password = password;
-		client.sendTCP(request);
+		netthread.sendTCPRequest(request);
 
-		long startTime = System.currentTimeMillis();
-		long currentTime;
-
-		while (loginResponseCallback == null) {
-			System.out.println("Waiting for server response.");
-			currentTime = System.currentTimeMillis();
-
-			if (currentTime - startTime > 3000) {
-				System.err.println("Server unreachable, please try again...");
-				break;
-			}
+		while (!netthread.updateForResponse()) {
+			// Can do things while waiting for response from the server.
 		}
 
 		try {
-			if (loginResponseCallback.onLoginResponse()) {
-				this.loginView.setVisible(false);
-				this.homeView.setVisible(true);
-				this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
-			} else {
-				System.err.println("Invalid password...");
+			if (netthread.getCurrentJobStatus().isSuccedded()) {
+				Login.LoginResponse response = ((Login.LoginResponse) netthread.getResponse());
+				if (response.isConnected) {
+					this.loginView.setVisible(false);
+					this.homeView.setVisible(true);
+					
+					PlayerNetObject playerNet = response.player;
+					this.homeView.updatePlayerData(playerNet.getName(), playerNet.getHighestScore());
+				} else {
+					// TODO Error popup or invalid password message
+					System.err.println("Invalid password...");
+				}
 			}
 		} catch (NullPointerException ex) {
-			System.err.println("Callback is null");
 		}
 	}
 
@@ -320,7 +286,9 @@ public class GameController {
 		// TODO, translate errors messages
 		SIMILAR_PASSWORDS("Les mots de passes sont différents", (PasswordChangeView frame, boolean state) -> {
 			frame.getChkboxSimilarPasswords().setSelected(state);
-		}), REQUIRE_UPPERCASE("Une majuscule requise", (PasswordChangeView frame, boolean state) -> {
+		}),
+
+		REQUIRE_UPPERCASE("Une majuscule requise", (PasswordChangeView frame, boolean state) -> {
 			frame.getChkboxMajuscule().setSelected(state);
 		}), REQUIRE_LOWERCASE("Une minuscule requise", (PasswordChangeView frame, boolean state) -> {
 			frame.getChkboxMinuscule().setSelected(state);

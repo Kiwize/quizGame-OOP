@@ -1,5 +1,7 @@
 package fr.thomas.proto0.net;
 
+import fr.thomas.proto0.net.object.PlayerNetObject;
+
 public class Login {
 	
 	public static class LoginRequest {
@@ -9,6 +11,7 @@ public class Login {
 	
 	public static class LoginResponse {
 		public boolean isConnected;
+		public PlayerNetObject player;
 	}
 
 }
