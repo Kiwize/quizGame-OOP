@@ -1,0 +1,8 @@
+Online game class:
+
+id
+name
+max_player
+begin_date
+time_to_answer
+

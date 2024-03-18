@@ -1,4 +1,4 @@
-package fr.thomas.proto0.net;
+package fr.thomas.proto0.net.request;
 
 import fr.thomas.proto0.net.object.PlayerNetObject;
 

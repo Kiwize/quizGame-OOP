@@ -15,6 +15,7 @@ public class HomeView extends JFrame {
 
 	private JLabel usernameLabel;
 	private JLabel scoreLabel;
+	private JButton multiplayerPlayButton;
 
 	private JButton playButton;
 	
@@ -49,6 +50,16 @@ public class HomeView extends JFrame {
 		});
 		playButton.setBounds(140, 178, 105, 27);
 		getContentPane().add(playButton);
+		
+		multiplayerPlayButton = new JButton("Multijoueur");
+		multiplayerPlayButton.setBounds(140, 220, 105, 27);
+		multiplayerPlayButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				controller.displayOnlineGames();
+			}
+		});
+		getContentPane().add(multiplayerPlayButton);
 		setSize(400, 300);
 		this.controller = controller;
 	}
@@ -63,5 +74,4 @@ public class HomeView extends JFrame {
 	public void setPlayButtonState(boolean state) {
 		playButton.setEnabled(state);
 	}
-
 }
