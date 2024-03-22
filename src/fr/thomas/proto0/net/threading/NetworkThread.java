@@ -15,6 +15,7 @@ import fr.thomas.proto0.net.object.OnlineGameNetObject;
 import fr.thomas.proto0.net.object.PlayerNetObject;
 import fr.thomas.proto0.net.request.Broadcast.ServerInfoRefresh;
 import fr.thomas.proto0.net.request.Login;
+import fr.thomas.proto0.net.request.ServerInfo.ServerCountDown;
 import fr.thomas.proto0.net.request.ServerInfo.ServerInfoRequest;
 import fr.thomas.proto0.net.request.ServerInfo.ServerInfoResponse;
 import fr.thomas.proto0.net.request.ServerJoin.ServerJoinRequest;
@@ -60,6 +61,7 @@ public class NetworkThread implements Runnable {
 		kryo.register(ServerQuitResponse.class);
 		kryo.register(ServerQuitRequest.class);
 		kryo.register(ServerInfoRefresh.class);
+		kryo.register(ServerCountDown.class);
 
 		client.start();
 
@@ -141,6 +143,11 @@ public class NetworkThread implements Runnable {
 						System.out.println("Déclenchement du callback.");
 						serverInfoRefreshCallback.onServerInfoRefresh(object);
 					}
+				}
+				
+				if(object instanceof ServerCountDown) {
+					int time = ((ServerCountDown) object).time;
+					controller.updateTimeLeftBeforeGameStart(time);
 				}
 
 				if (callback != null)

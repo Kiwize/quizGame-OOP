@@ -18,11 +18,13 @@ public class Player implements IModel {
 		this.name = name;
 		this.controller = controller;
 	}
+	
+	
 
 	public String getName() {
 		return name;
 	}
-
+	
 	public int getHighestScore() {
 		try {
 			Statement st = controller.getDatabaseHelper().getStatement(0);
