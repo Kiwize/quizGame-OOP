@@ -20,7 +20,7 @@ public class Config {
 		
 		this.theConfig = new Properties();
 		
-		try (FileInputStream input = new FileInputStream("resources/data/db.env")){
+		try (FileInputStream input = new FileInputStream("./data/sbcg.cfg")){
 			theConfig.load(input);
 		} catch (IOException e) {
 			e.printStackTrace();

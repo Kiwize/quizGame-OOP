@@ -192,4 +192,8 @@ public class PlayView extends JFrame {
 	public void resetPointer() {
 		qpointer = 0;
 	}
+	
+	public void resetGameHistory() {
+		gameHistory.clear();
+	}
 }
