@@ -177,6 +177,7 @@ public class GameController {
 				multiplayerListView.setVisible(false);
 				multiplayerGameHub.setVisible(true);
 				multiplayerGameHub.setGameID(game.getId());
+				multiplayerGameHub.startSync();
 			} else
 				System.out.println("Le serveur " + game.getName() + " n'est pas joignable... ");
 		}
@@ -196,6 +197,7 @@ public class GameController {
 		if(netThreadClass.getResponse() != null) {
 			ServerQuitResponse response = (ServerQuitResponse) netThreadClass.getResponse();
 			if(response.hasQuit) {
+				multiplayerGameHub.stopSync();
 				multiplayerGameHub.dispose();
 				multiplayerListView.setVisible(true);
 				homeView.setVisible(true);
@@ -302,7 +304,7 @@ public class GameController {
 		
 		if(netThreadClass.getResponse() != null) {
 			ServerInfoResponse response = (ServerInfoResponse) netThreadClass.getResponse();
-			multiplayerGameHub.updateServerInfos(response.name, response.maxPlayers, response.players);
+			multiplayerGameHub.updateServerInfos(response.name, response.maxPlayers, response.players, response.minPlayers);
 		}
 	}
 
@@ -447,6 +449,10 @@ public class GameController {
 
 	public void setMyConfig(Config myConfig) {
 		this.myConfig = myConfig;
+	}
+
+	public void updateTimeLeftBeforeGameStart(int time) {
+		this.multiplayerGameHub.updateTimeLeft(time);
 	}
 
 	
