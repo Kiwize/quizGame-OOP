@@ -94,7 +94,10 @@ public class MultiplayerGameHub extends JFrame {
 	public void updateTimeLeft(int time) {
 		if (time > 0)
 			waitingPlayersLabel.setText("La partie commence dans " + time + " secondes.");
-		else
+		else {
 			waitingPlayersLabel.setText("La partie va commencer !");
+			controller.startOnlineGame(gameID); 
+			serverSyncTimer.cancel();
+		}
 	}
 }
