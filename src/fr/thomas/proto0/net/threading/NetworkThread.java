@@ -19,6 +19,8 @@ import fr.thomas.proto0.net.object.PlayerNetObject;
 import fr.thomas.proto0.net.object.QuestionNetObject;
 import fr.thomas.proto0.net.request.Broadcast.ServerInfoRefresh;
 import fr.thomas.proto0.net.request.Login;
+import fr.thomas.proto0.net.request.Login.PlayerActivityAnswer;
+import fr.thomas.proto0.net.request.Login.PlayerActivityRequest;
 import fr.thomas.proto0.net.request.ServerInfo.ServerCountDown;
 import fr.thomas.proto0.net.request.ServerInfo.ServerInfoRequest;
 import fr.thomas.proto0.net.request.ServerInfo.ServerInfoResponse;
@@ -76,6 +78,8 @@ public class NetworkThread implements Runnable {
 		kryo.register(AnswerNetObject.class);
 		kryo.register(ServerEndGame.class);
 		kryo.register(AnswerTimeLeft.class);
+		kryo.register(PlayerActivityAnswer.class);
+		kryo.register(PlayerActivityRequest.class);
 
 		client.start();
 
@@ -186,6 +190,13 @@ public class NetworkThread implements Runnable {
 					int timeLeft = ((AnswerTimeLeft) object).timeLeftToAnswer;
 					int maxTime = ((AnswerTimeLeft) object).maxTime;
 					controller.updateTimeLeftToAnswer(timeLeft, maxTime);
+				}
+				
+				if(object instanceof PlayerActivityRequest) {
+					PlayerActivityAnswer answer = new PlayerActivityAnswer();
+					answer.isPlayerActive = true;
+					
+					sendTCPRequest(answer);
 				}
 
 				if (callback != null)
