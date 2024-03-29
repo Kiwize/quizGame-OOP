@@ -6,6 +6,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import fr.thomas.proto0.controller.GameController;
+import fr.thomas.proto0.net.object.AnswerNetObject;
+import fr.thomas.proto0.net.object.QuestionNetObject;
 import fr.thomas.proto0.utils.QuestionsBuilder;
 
 public class Question {
@@ -20,6 +22,17 @@ public class Question {
 		this.label = label;
 		this.answers = answers;
 		this.controller = controller;
+	}
+	
+	public Question(QuestionNetObject netObject) {
+		this.id = netObject.getId();
+		this.label = netObject.getLabel();
+		this.difficultyLevel = netObject.getDifficultyLevel();
+		
+		answers = new ArrayList<Answer>();
+		for(AnswerNetObject answerNetObject : netObject.getAnswers()) {
+			answers.add(new Answer(answerNetObject));
+		}
 	}
 
 	public Question(int id, GameController controller) {

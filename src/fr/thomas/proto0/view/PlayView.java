@@ -24,7 +24,7 @@ public class PlayView extends JFrame {
 	private GameController controller;
 	private Question loadedQuestion;
 	private int qpointer;
-
+	
 	private ArrayList<Question> gameQuestions;
 
 	private JLabel questionLabel;
@@ -39,8 +39,12 @@ public class PlayView extends JFrame {
 	private HashMap<Question, ButtonGroup> answerButtonMap;
 	private HashMap<Question, Answer> gameHistory;
 
+	private int onlineGameID = -1;
+	
 	private static final long serialVersionUID = -6452443507319459902L;
 	private JButton submitButton;
+	
+	private int timeToAnswer;
 
 	public PlayView(GameController controller) {
 		this.controller = controller;
@@ -124,7 +128,59 @@ public class PlayView extends JFrame {
 		submitButton.setBounds(275, 329, 105, 27);
 		getContentPane().add(submitButton);
 	}
+	
+	/**
+	 * Only use this method if this view is used in a multiplayer context
+	 */
+	public void initMultiplayerContext(int onlineGameID) {
+		nextButton.setVisible(false);
+		prevButton.setVisible(false);
+		submitButton.setVisible(false);
+		this.onlineGameID = onlineGameID;
+	}
+	
+	public void disableMultiplayerContext() {
+		nextButton.setVisible(true);
+		prevButton.setVisible(true);
+		submitButton.setVisible(true);
+		this.onlineGameID = -1;
+	}
+	
+	
+	public void setTimeToAnswer(int timeToAnswer) {
+		this.timeToAnswer = timeToAnswer;
+	}
+	 
+	public void loadSingleQuestion(Question question) {
+		loadedQuestion = question;
+		int i = 0;
+		questionLabel.setText(question.getLabel());
+		this.progressQuestionBar.setValue(this.timeToAnswer);
+		
+		ButtonGroup buttonGroup = new ButtonGroup();
 
+		questionAnswersPanel.removeAll();
+
+		for (Answer answer : question.getAnswers()) {
+			JRadioButton jrb = new JRadioButton(answer.getLabel());
+			jrb.setBounds(0, 0 + (i * 45), 300, 50);
+			jrb.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					System.out.println("Selected answer : " + answer.getLabel());
+					controller.sendChoosenAnswer(answer, onlineGameID);
+				}
+			});
+			buttonGroup.add(jrb);
+			i++;
+		}
+
+		answerButtonMap.put(question, buttonGroup);
+		revalidate();
+		repaint();
+		loadQuestion(question);
+	}
+	
 	public void loadUIQuestions(ArrayList<Question> questions) {
 		this.gameQuestions = questions;
 		this.qpointer = 0;
@@ -171,6 +227,11 @@ public class PlayView extends JFrame {
 
 		return true;
 	}
+	
+	public void updateTimeLeftToAnswer(int timeLeft, int maxTime) {
+		this.progressQuestionBar.setMaximum(maxTime);
+		this.progressQuestionBar.setValue(timeLeft);
+	}
 
 	public void loadQuestion(Question question) {
 		questionAnswersPanel.removeAll();
@@ -184,8 +245,14 @@ public class PlayView extends JFrame {
 		}
 
 		questionLabel.setText(question.getLabel());
+		revalidate();
+		repaint();
 	}
 
+	public Question getLoadedQuestion() {
+		return loadedQuestion;
+	}
+	
 	/**
 	 * Resets question pointer
 	 */
@@ -196,4 +263,10 @@ public class PlayView extends JFrame {
 	public void resetGameHistory() {
 		gameHistory.clear();
 	}
+	
+	public int getOnlineGameID() {
+		return onlineGameID;
+	}
+
+	
 }

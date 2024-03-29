@@ -22,6 +22,7 @@ import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Game;
 import fr.thomas.proto0.model.Player;
 import fr.thomas.proto0.model.Question;
+import fr.thomas.proto0.net.object.AnswerNetObject;
 import fr.thomas.proto0.net.object.OnlineGameNetObject;
 import fr.thomas.proto0.net.object.PlayerNetObject;
 import fr.thomas.proto0.net.request.Login;
@@ -31,6 +32,7 @@ import fr.thomas.proto0.net.request.ServerJoin.ServerJoinRequest;
 import fr.thomas.proto0.net.request.ServerJoin.ServerJoinResponse;
 import fr.thomas.proto0.net.request.ServerList.ServerListRequest;
 import fr.thomas.proto0.net.request.ServerList.ServerListResponse;
+import fr.thomas.proto0.net.request.ServerPlay.GetPlayerAnswer;
 import fr.thomas.proto0.net.request.ServerQuit.ServerQuitRequest;
 import fr.thomas.proto0.net.request.ServerQuit.ServerQuitResponse;
 import fr.thomas.proto0.net.threading.NetworkThread;
@@ -73,16 +75,25 @@ public class GameController {
 
 	private ArrayList<OnlineGameNetObject> serverList;
 
+	private String serverAdress;
+
 	/**
 	 * @author Thomas PRADEAU
 	 */
-	public GameController() {
+	public GameController(String[] args) {
+		this.serverAdress = "127.0.0.1";
 
+		if (args.length == 2) {
+			if (args[0] == "-h") {
+				System.out.println("Trying to connect to server : " + args[1]);
+				this.serverAdress = args[1];
+			}
+		}
 		// Créer la vue
 		this.myConfig = new Config();
 
 		// Start client
-		this.netThreadClass = new NetworkThread(this, "127.0.0.1");
+		this.netThreadClass = new NetworkThread(this, serverAdress);
 		networkThread = new Thread(netThreadClass);
 		networkThread.setName("network_thread");
 		networkThread.start();
@@ -132,7 +143,7 @@ public class GameController {
 
 					PlayerNetObject playerNet = response.player;
 					this.homeView.updatePlayerData(playerNet.getName(), playerNet.getHighestScore());
-					
+
 					this.player.setName(playerNet.getName());
 					this.player.setId(playerNet.getId());
 					this.player.setPassword(playerNet.getPassword());
@@ -146,28 +157,16 @@ public class GameController {
 	}
 
 	public void joinOnlineGame(OnlineGameNetObject game, Player player) {
-		
-		/*
-		netThreadClass.defineServerInfoRefreshCallback(new IServerInfoRefreshRequest() {
-			
-			@Override
-			public void onServerInfoRefresh(Object object) {
-				if(((ServerInfoRefresh) object).playerIDs.contains(player.getID())) {
-					updateMultiplayerHubServerInfos(game.getId());
-					System.out.println("Server asks info refresh for game " + game.getName() + " player " + player.getName());
-				}
-			}
-		});
-		*/
 
 		// Ask server to join a game
 		ServerJoinRequest request = new ServerJoinRequest();
 		request.game = game;
-		request.player = new PlayerNetObject(player.getID(), player.getName(), player.getPassword(), player.getHighestScore());		
+		request.player = new PlayerNetObject(player.getID(), player.getName(), player.getPassword(),
+				player.getHighestScore());
 		netThreadClass.sendTCPRequest(request);
 
 		while (!netThreadClass.updateForResponse()) {
-			// Display loading screen and update some shit
+			// Display loading screen and update some shitł
 		}
 
 		if (netThreadClass.getResponse() != null) {
@@ -177,25 +176,26 @@ public class GameController {
 				multiplayerListView.setVisible(false);
 				multiplayerGameHub.setVisible(true);
 				multiplayerGameHub.setGameID(game.getId());
+				multiplayerGameHub.startSync();
 			} else
 				System.out.println("Le serveur " + game.getName() + " n'est pas joignable... ");
 		}
-
 	}
-	
+
 	public void quitOnlineGame(int gameID) {
 		ServerQuitRequest request = new ServerQuitRequest();
 		request.gameID = gameID;
 		request.playerID = this.player.getID();
 		netThreadClass.sendTCPRequest(request);
-		
-		while(!netThreadClass.updateForResponse()) {
-			
+
+		while (!netThreadClass.updateForResponse()) {
+
 		}
-		
-		if(netThreadClass.getResponse() != null) {
+
+		if (netThreadClass.getResponse() != null) {
 			ServerQuitResponse response = (ServerQuitResponse) netThreadClass.getResponse();
-			if(response.hasQuit) {
+			if (response.hasQuit) {
+				multiplayerGameHub.stopSync();
 				multiplayerGameHub.dispose();
 				multiplayerListView.setVisible(true);
 				homeView.setVisible(true);
@@ -290,19 +290,20 @@ public class GameController {
 		}
 
 	}
-	
+
 	public void updateMultiplayerHubServerInfos(int gameID) {
 		ServerInfoRequest request = new ServerInfoRequest();
 		request.gameID = gameID;
 		netThreadClass.sendTCPRequest(request);
-		
-		while(!netThreadClass.updateForResponse()) {
-			//Loading stuff
+
+		while (!netThreadClass.updateForResponse()) {
+			// Loading stuff
 		}
-		
-		if(netThreadClass.getResponse() != null) {
+
+		if (netThreadClass.getResponse() != null) {
 			ServerInfoResponse response = (ServerInfoResponse) netThreadClass.getResponse();
-			multiplayerGameHub.updateServerInfos(response.name, response.maxPlayers, response.players);
+			multiplayerGameHub.updateServerInfos(response.name, response.maxPlayers, response.players,
+					response.minPlayers);
 		}
 	}
 
@@ -330,6 +331,36 @@ public class GameController {
 			JOptionPane.showMessageDialog(loginView.getComponent(0), "Les mots de passe sont différents !", "Erreur",
 					JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	public void sendChoosenAnswer(Answer answer, int onlineGameID) {
+		GetPlayerAnswer getPlayerAnswerRequest = new GetPlayerAnswer();
+		getPlayerAnswerRequest.answer = new AnswerNetObject(answer.getLabel(), answer.isCorrect());
+		getPlayerAnswerRequest.onlineGameID = onlineGameID;
+		getPlayerAnswerRequest.playerID = player.getID();
+
+		netThreadClass.sendTCPRequest(getPlayerAnswerRequest);
+	}
+
+	public void startOnlineGame(int onlineGameID) {
+		multiplayerGameHub.setVisible(false);
+		playView.initMultiplayerContext(onlineGameID);
+		playView.setVisible(true);
+	}
+
+	public void endOnlineGame(int score) {
+		System.out.println("Your score " + score);
+		multiplayerGameHub.setVisible(true);
+		playView.setVisible(false);
+		playView.disableMultiplayerContext();
+	}
+
+	public void showQuestion(Question question) {
+		playView.loadSingleQuestion(question);
+	}
+
+	public void updateTimeLeftToAnswer(int timeLeft, int maxTime) {
+		playView.updateTimeLeftToAnswer(timeLeft, maxTime);
 	}
 
 	public HashMap<EPasswordError, Boolean> passwordFieldUpdate(String password, String confirmation) {
@@ -449,5 +480,8 @@ public class GameController {
 		this.myConfig = myConfig;
 	}
 
-	
+	public void updateTimeLeftBeforeGameStart(int time) {
+		this.multiplayerGameHub.updateTimeLeft(time);
+	}
+
 }
