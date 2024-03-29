@@ -18,6 +18,7 @@ import org.passay.PasswordValidator;
 import org.passay.RuleResult;
 import org.passay.WhitespaceRule;
 
+import fr.thomas.proto0.log.Logger;
 import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Game;
 import fr.thomas.proto0.model.Player;
@@ -55,7 +56,6 @@ public class GameController {
 	private Player player;
 	private ArrayList<Question> questions;
 	private Game game;
-	private int diff;
 	private Config myConfig;
 
 	private LoginView loginView;
@@ -76,11 +76,18 @@ public class GameController {
 	private ArrayList<OnlineGameNetObject> serverList;
 
 	private String serverAdress;
+	
+	private Logger logger;
 
 	/**
 	 * @author Thomas PRADEAU
 	 */
 	public GameController(String[] args) {
+		logger = new Logger(true);
+		logger.updateDebugLogState(true);
+		
+		logger.log("Starting client...");
+		
 		this.serverAdress = "127.0.0.1";
 
 		if (args.length == 2) {
@@ -482,6 +489,10 @@ public class GameController {
 
 	public void updateTimeLeftBeforeGameStart(int time) {
 		this.multiplayerGameHub.updateTimeLeft(time);
+	}
+	
+	public Logger getLogger() {
+		return logger;
 	}
 
 }

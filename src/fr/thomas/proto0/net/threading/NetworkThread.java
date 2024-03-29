@@ -9,6 +9,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import fr.thomas.proto0.controller.GameController;
+import fr.thomas.proto0.log.ELogLevel;
 import fr.thomas.proto0.model.Question;
 import fr.thomas.proto0.net.INetCallback;
 import fr.thomas.proto0.net.IServerInfoRefreshRequest;
@@ -81,7 +82,7 @@ public class NetworkThread implements Runnable {
 		try {
 			client.connect(5000, serverAddress, 54555, 54777);
 		} catch (IOException e) {
-			e.printStackTrace();
+			controller.getLogger().log("Cannot connect to the server at " + serverAddress, ELogLevel.CRITICAL); //TODO: Give possibility to choose the server to connect
 		} // Timeout, IP, TCP port, UDP port
 	}
 
@@ -125,6 +126,8 @@ public class NetworkThread implements Runnable {
 	public void run() {
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
+				controller.getLogger().log("Received packet from server " + object.getClass().getName(), ELogLevel.DEBUG);
+				
 				if (object instanceof Login.LoginResponse) {
 					Login.LoginResponse response_object = (Login.LoginResponse) object;
 					response = response_object;
@@ -184,34 +187,6 @@ public class NetworkThread implements Runnable {
 					int maxTime = ((AnswerTimeLeft) object).maxTime;
 					controller.updateTimeLeftToAnswer(timeLeft, maxTime);
 				}
-				
-				/*
-				if(object instanceof GetPlayerAnswerRequest) {
-					HashMap<Player, Answer> playerAnswer = controller.getPlayerAnswser();
-					GetPlayerAnswer playerAnswerRequest = new GetPlayerAnswer();
-					
-					if(playerAnswer.size() == 0) {
-						System.out.println("No answer selected !");
-						playerAnswerRequest.playerID = controller.getPlayer().getID();
-						playerAnswerRequest.answer = null;
-						playerAnswerRequest.onlineGameID = ((GetPlayerAnswerRequest) object).onlineGameID;
-						client.sendTCP(playerAnswerRequest);
-						return;
-					}
-					
-					//If multiple answers for one question, send on request for each answer
-					playerAnswer.forEach(new BiConsumer<Player, Answer>() {
-
-						@Override
-						public void accept(Player player, Answer answer) {
-							playerAnswerRequest.playerID = player.getID();
-							playerAnswerRequest.answer = new AnswerNetObject(answer.getLabel(), answer.isCorrect());
-							playerAnswerRequest.onlineGameID = ((GetPlayerAnswerRequest) object).onlineGameID;
-							client.sendTCP(playerAnswerRequest);
-						}
-					});
-				}
-				*/
 
 				if (callback != null)
 					callback.onResponse(response);

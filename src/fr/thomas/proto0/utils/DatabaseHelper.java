@@ -6,7 +6,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+
 import fr.thomas.proto0.controller.GameController;
+import fr.thomas.proto0.log.ELogLevel;
 
 public class DatabaseHelper {
 
@@ -37,13 +40,21 @@ public class DatabaseHelper {
 			e.printStackTrace();
 		}
 
-		this.url += this.bdname;
-		this.con = DriverManager.getConnection(url, username, password);
-
-		activeStatements = new ArrayList<Statement>();
-		for (int i = 0; i < ACTIVE_STATEMENT_COUNT; i++) {
-			activeStatements.add(con.createStatement());
+		try {
+			this.url += this.bdname;
+			this.con = DriverManager.getConnection(url, username, password);
+		} catch (CommunicationsException e) {
+			controller.getLogger().log("Database connexion error", ELogLevel.CRITICAL);
+			controller.getLogger().log("Exiting application...", ELogLevel.CRITICAL);
+			System.exit(-2);
 		}
+
+		try {
+			activeStatements = new ArrayList<Statement>();
+			for (int i = 0; i < ACTIVE_STATEMENT_COUNT; i++) {
+				activeStatements.add(con.createStatement());
+			}
+		} catch (NullPointerException e) {}
 	}
 
 	public Statement create() {
