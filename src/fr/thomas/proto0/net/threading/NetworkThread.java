@@ -9,6 +9,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import fr.thomas.proto0.controller.GameController;
+import fr.thomas.proto0.log.ELogLevel;
 import fr.thomas.proto0.model.Question;
 import fr.thomas.proto0.net.INetCallback;
 import fr.thomas.proto0.net.IServerInfoRefreshRequest;
@@ -81,7 +82,7 @@ public class NetworkThread implements Runnable {
 		try {
 			client.connect(5000, serverAddress, 54555, 54777);
 		} catch (IOException e) {
-			e.printStackTrace();
+			controller.getLogger().log("Cannot connect to the server at " + serverAddress, ELogLevel.CRITICAL); //TODO: Give possibility to choose the server to connect
 		} // Timeout, IP, TCP port, UDP port
 	}
 
