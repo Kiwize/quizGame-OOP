@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import fr.thomas.proto0.controller.GameController;
+import fr.thomas.proto0.view.PlayFrame;
 
 public class Game implements IModel {
 
@@ -19,12 +20,15 @@ public class Game implements IModel {
 
 	private Random rand;
 	private GameController controller;
+	
+	private PlayFrame playFrame;
 
 	public Game(GameController controller, Player player) {
 		this.rand = new Random();
 		this.player = player;
 		this.controller = controller;
 		this.score = 0;
+		this.playFrame =  (PlayFrame) this.controller.getGameEngine().getFrameManager().getShownFrame("play_frame");
 	}
 
 	/**
@@ -33,9 +37,12 @@ public class Game implements IModel {
 	 * @author Thomas PRADEAU
 	 */
 	public void begin() {
-		this.controller.getPlayView().resetPointer();
-		this.controller.getPlayView().setVisible(true);
-		this.controller.getPlayView().loadUIQuestions(controller.getQuestions());
+//		this.controller.getPlayView().resetPointer();
+//		this.controller.getPlayView().setVisible(true);
+//		this.controller.getPlayView().loadUIQuestions(controller.getQuestions());
+		playFrame.getProgressQuetionBar().setMaxValue(controller.getQuestions().size());
+		playFrame.loadQuestion(controller.getQuestions().get(0));
+		playFrame.init();
 	}
 
 	public void addScore(int amount) {

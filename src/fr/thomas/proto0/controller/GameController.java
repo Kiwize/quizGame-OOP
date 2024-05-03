@@ -1,12 +1,9 @@
 package fr.thomas.proto0.controller;
 
-import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.JOptionPane;
 
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
@@ -18,6 +15,7 @@ import org.passay.PasswordValidator;
 import org.passay.RuleResult;
 import org.passay.WhitespaceRule;
 
+import fr.thomas.engine.GameEngine;
 import fr.thomas.proto0.log.Logger;
 import fr.thomas.proto0.model.Answer;
 import fr.thomas.proto0.model.Game;
@@ -34,19 +32,19 @@ import fr.thomas.proto0.net.request.ServerJoin.ServerJoinResponse;
 import fr.thomas.proto0.net.request.ServerList.ServerListRequest;
 import fr.thomas.proto0.net.request.ServerList.ServerListResponse;
 import fr.thomas.proto0.net.request.ServerPlay.GetPlayerAnswer;
+import fr.thomas.proto0.net.request.ServerPlayerRank.PlayerRankRequest;
+import fr.thomas.proto0.net.request.ServerPlayerRank.PlayerRankResponse;
 import fr.thomas.proto0.net.request.ServerQuit.ServerQuitRequest;
 import fr.thomas.proto0.net.request.ServerQuit.ServerQuitResponse;
 import fr.thomas.proto0.net.threading.NetworkThread;
 import fr.thomas.proto0.net.threading.NetworkThread.NetworkJobStatus;
 import fr.thomas.proto0.utils.DatabaseHelper;
-import fr.thomas.proto0.view.ConsoleView;
-import fr.thomas.proto0.view.GameScore;
-import fr.thomas.proto0.view.HomeView;
-import fr.thomas.proto0.view.LoginView;
-import fr.thomas.proto0.view.MultiplayerGameHub;
-import fr.thomas.proto0.view.MultiplayerListView;
-import fr.thomas.proto0.view.PasswordChangeView;
-import fr.thomas.proto0.view.PlayView;
+import fr.thomas.proto0.view.LoginFrame;
+import fr.thomas.proto0.view.swing.ConsoleView;
+import fr.thomas.proto0.view.swing.GameScore;
+import fr.thomas.proto0.view.swing.MultiplayerGameHub;
+import fr.thomas.proto0.view.swing.MultiplayerListView;
+import fr.thomas.proto0.view.swing.PasswordChangeView;
 
 public class GameController {
 
@@ -58,9 +56,8 @@ public class GameController {
 	private Game game;
 	private Config myConfig;
 
-	private LoginView loginView;
-	private HomeView homeView;
-	private PlayView playView;
+	private LoginFrame loginView;
+
 	private PasswordChangeView passchView;
 	private GameScore gameScoreView;
 	private MultiplayerListView multiplayerListView;
@@ -76,19 +73,22 @@ public class GameController {
 	private ArrayList<OnlineGameNetObject> serverList;
 
 	private String serverAdress;
-	
+
+	private GameEngine gameEngine;
+
 	private Logger logger;
 
 	/**
 	 * @author Thomas PRADEAU
 	 */
 	public GameController(String[] args) {
+
 		logger = new Logger(true);
 		logger.updateDebugLogState(true);
-		
+
 		logger.log("Starting client...");
-		
-		this.serverAdress = "127.0.0.1";
+
+		this.serverAdress = "192.168.122.173";
 
 		if (args.length == 2) {
 			if (args[0] == "-h") {
@@ -111,12 +111,7 @@ public class GameController {
 			e.printStackTrace();
 		}
 
-		this.view = new ConsoleView(this);
-		this.loginView = new LoginView(this);
 		player = new Player("", this);
-		this.homeView = new HomeView(this);
-		this.loginView.setVisible(true);
-		this.playView = new PlayView(this);
 		this.passchView = new PasswordChangeView(this);
 		this.multiplayerListView = new MultiplayerListView(this);
 		this.multiplayerGameHub = new MultiplayerGameHub(this);
@@ -129,6 +124,12 @@ public class GameController {
 				new IllegalSequenceRule(EnglishSequenceData.Alphabetical, 4, false),
 				new IllegalSequenceRule(EnglishSequenceData.Numerical, 4, false),
 				new IllegalSequenceRule(EnglishSequenceData.USQwerty, 4, false), new WhitespaceRule());
+
+		this.gameEngine = new GameEngine(this);
+		this.gameEngine.openWindow(); //Main window loop
+		
+		multiplayerGameHub.stopSyncTimer();
+		netThreadClass.getClient().stop();
 	}
 
 	public void playerAuth(String name, String password) {
@@ -145,21 +146,21 @@ public class GameController {
 			if (netThreadClass.getCurrentJobStatus().isSuccedded()) {
 				Login.LoginResponse response = ((Login.LoginResponse) netThreadClass.getResponse());
 				if (response.isConnected) {
-					this.loginView.setVisible(false);
-					this.homeView.setVisible(true);
 
 					PlayerNetObject playerNet = response.player;
-					this.homeView.updatePlayerData(playerNet.getName(), playerNet.getHighestScore());
-
-					this.player.setName(playerNet.getName());
-					this.player.setId(playerNet.getId());
-					this.player.setPassword(playerNet.getPassword());
+					//TODO Update player data
+					player.setId(playerNet.getId());
+					player.setName(playerNet.getName());
+					player.setPassword(playerNet.getPassword());
+					
+					gameEngine.getFrameManager().showFrame("home_frame");
 				} else {
 					// TODO Error popup or invalid password message
 					System.err.println("Invalid password...");
 				}
 			}
 		} catch (NullPointerException ex) {
+			ex.printStackTrace();
 		}
 	}
 
@@ -179,7 +180,7 @@ public class GameController {
 		if (netThreadClass.getResponse() != null) {
 			ServerJoinResponse response = (ServerJoinResponse) netThreadClass.getResponse();
 			if (response.isJoinable) {
-				homeView.setVisible(false);
+//				homeView.setVisible(false);
 				multiplayerListView.setVisible(false);
 				multiplayerGameHub.setVisible(true);
 				multiplayerGameHub.setGameID(game.getId());
@@ -205,37 +206,34 @@ public class GameController {
 				multiplayerGameHub.stopSync();
 				multiplayerGameHub.dispose();
 				multiplayerListView.setVisible(true);
-				homeView.setVisible(true);
+//				homeView.setVisible(true);
 			}
 		}
 	}
 
 	public void startGame() {
 		this.game = new Game(this, player);
-		this.playView = new PlayView(this);
+		
 		this.gameScoreView = new GameScore(this);
 		if (!isGameStarted) {
 			game.getRandomQuestions(); // Choisir les questions aléatoirement
 			game.begin();
-			playView.revalidate();
-			playView.repaint();
+			
+			gameEngine.getFrameManager().showFrame("play_frame");
+			
 			isGameStarted = true;
-			homeView.setPlayButtonState(false);
-			homeView.setVisible(false);
-			homeView.revalidate();
-			homeView.repaint();
 		}
 	}
 
 	public void finishGame(HashMap<Question, Answer> gameHistory) {
 		// TODO Show recap view
 		isGameStarted = false;
-		homeView.setPlayButtonState(true);
-		homeView.setVisible(true);
-		homeView.revalidate();
-		homeView.repaint();
+//		homeView.setPlayButtonState(true);
+//		homeView.revalidate();
+//		homeView.repaint();
+		
+		gameEngine.getFrameManager().showFrame("home_frame");
 
-		playView.setVisible(false);
 
 		int gameScoreBuffer = 0;
 
@@ -247,7 +245,7 @@ public class GameController {
 
 		game.setScore(gameScoreBuffer);
 		game.insert();
-		this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
+//		this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
 
 		// view.showGameRecap(gameHistory);
 		gameScoreView.setGameHistory(gameHistory);
@@ -320,23 +318,18 @@ public class GameController {
 			final RuleResult validate = passwordValidator.validate(passwordData);
 
 			if (!validate.isValid()) {
-				JOptionPane.showMessageDialog(loginView.getComponent(0), "Mot de passe non conforme !", "Erreur",
-						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
 			if (player.updatePassword(password)) {
-				JOptionPane.showMessageDialog(loginView.getComponent(0), "Mot de passe changé avec succés !",
-						"Mot de passe modifié.", JOptionPane.INFORMATION_MESSAGE);
-
-				loginView.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
-				passchView.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
-				homeView.setVisible(true);
-				this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
+				loginView.setVisible(false); // TODO : Close window
+//				homeView.setVisible(true);
+//				this.homeView.updatePlayerData(player.getName(), player.getHighestScore());
 			}
 		} else {
-			JOptionPane.showMessageDialog(loginView.getComponent(0), "Les mots de passe sont différents !", "Erreur",
-					JOptionPane.ERROR_MESSAGE);
+			// JOptionPane.showMessageDialog(loginView.getComponent(0), "Les mots de passe
+			// sont différents !", "Erreur",
+			// JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -351,23 +344,44 @@ public class GameController {
 
 	public void startOnlineGame(int onlineGameID) {
 		multiplayerGameHub.setVisible(false);
-		playView.initMultiplayerContext(onlineGameID);
-		playView.setVisible(true);
+//		playView.initMultiplayerContext(onlineGameID);
+//		playView.setVisible(true);
 	}
 
 	public void endOnlineGame(int score) {
 		System.out.println("Your score " + score);
 		multiplayerGameHub.setVisible(true);
-		playView.setVisible(false);
-		playView.disableMultiplayerContext();
+//		playView.setVisible(false);
+//		playView.disableMultiplayerContext();
 	}
 
 	public void showQuestion(Question question) {
-		playView.loadSingleQuestion(question);
+//		playView.loadSingleQuestion(question);
+	}
+
+	public HashMap<String, Integer> getPlayerOnlineGameRank(int id) {
+		HashMap<String, Integer> playerNameScoreMap = new HashMap<String, Integer>();
+
+		PlayerRankRequest playerRankRequest = new PlayerRankRequest();
+		PlayerRankResponse playerRankResponse;
+		playerRankRequest.gameid = id;
+
+		netThreadClass.sendTCPRequest(playerRankRequest);
+
+		while (!netThreadClass.updateForResponse()) {
+
+		}
+
+		if (netThreadClass.getResponse() != null) {
+			playerRankResponse = (PlayerRankResponse) netThreadClass.getResponse();
+			playerNameScoreMap = playerRankResponse.playerRankMap;
+		}
+
+		return playerNameScoreMap;
 	}
 
 	public void updateTimeLeftToAnswer(int timeLeft, int maxTime) {
-		playView.updateTimeLeftToAnswer(timeLeft, maxTime);
+//		playView.updateTimeLeftToAnswer(timeLeft, maxTime);
 	}
 
 	public HashMap<EPasswordError, Boolean> passwordFieldUpdate(String password, String confirmation) {
@@ -431,10 +445,6 @@ public class GameController {
 		return game;
 	}
 
-	public PlayView getPlayView() {
-		return playView;
-	}
-
 	public DatabaseHelper getDatabaseHelper() {
 		return databaseHelper;
 	}
@@ -490,9 +500,13 @@ public class GameController {
 	public void updateTimeLeftBeforeGameStart(int time) {
 		this.multiplayerGameHub.updateTimeLeft(time);
 	}
-	
+
 	public Logger getLogger() {
 		return logger;
+	}
+	
+	public GameEngine getGameEngine() {
+		return gameEngine;
 	}
 
 }

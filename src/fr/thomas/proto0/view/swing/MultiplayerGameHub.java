@@ -1,4 +1,4 @@
-package fr.thomas.proto0.view;
+package fr.thomas.proto0.view.swing;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -69,6 +69,10 @@ public class MultiplayerGameHub extends JFrame {
 
 	public void stopSync() {
 		syncServerData = false;
+	}
+	
+	public void stopSyncTimer() {
+		serverSyncTimer.cancel();
 	}
 
 	public void updateServerInfos(String name, int maxPlayer, ArrayList<Integer> infos, int playerRequierment) {

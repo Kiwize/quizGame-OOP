@@ -2,6 +2,7 @@ package fr.thomas.proto0.net.threading;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
@@ -32,6 +33,9 @@ import fr.thomas.proto0.net.request.ServerPlay.AnswerTimeLeft;
 import fr.thomas.proto0.net.request.ServerPlay.GetPlayerAnswer;
 import fr.thomas.proto0.net.request.ServerPlay.ServerEndGame;
 import fr.thomas.proto0.net.request.ServerPlay.ShowQuestion;
+import fr.thomas.proto0.net.request.ServerPlayerRank;
+import fr.thomas.proto0.net.request.ServerPlayerRank.PlayerRankRequest;
+import fr.thomas.proto0.net.request.ServerPlayerRank.PlayerRankResponse;
 import fr.thomas.proto0.net.request.ServerQuit.ServerQuitRequest;
 import fr.thomas.proto0.net.request.ServerQuit.ServerQuitResponse;
 
@@ -80,13 +84,25 @@ public class NetworkThread implements Runnable {
 		kryo.register(AnswerTimeLeft.class);
 		kryo.register(PlayerActivityAnswer.class);
 		kryo.register(PlayerActivityRequest.class);
+		kryo.register(ServerPlayerRank.class);
+		kryo.register(PlayerRankRequest.class);
+		kryo.register(PlayerRankResponse.class);
+		kryo.register(HashMap.class);
 
 		client.start();
 
 		try {
 			client.connect(5000, serverAddress, 54555, 54777);
 		} catch (IOException e) {
-			controller.getLogger().log("Cannot connect to the server at " + serverAddress, ELogLevel.CRITICAL); //TODO: Give possibility to choose the server to connect
+			controller.getLogger().log("Cannot connect to the server at " + serverAddress, ELogLevel.CRITICAL); // TODO:
+																												// Give
+																												// possibility
+																												// to
+																												// choose
+																												// the
+																												// server
+																												// to
+																												// connect
 		} // Timeout, IP, TCP port, UDP port
 	}
 
@@ -130,8 +146,9 @@ public class NetworkThread implements Runnable {
 	public void run() {
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
-				controller.getLogger().log("Received packet from server " + object.getClass().getName(), ELogLevel.DEBUG);
-				
+				controller.getLogger().log("Received packet from server " + object.getClass().getName(),
+						ELogLevel.DEBUG);
+
 				if (object instanceof Login.LoginResponse) {
 					Login.LoginResponse response_object = (Login.LoginResponse) object;
 					response = response_object;
@@ -162,41 +179,45 @@ public class NetworkThread implements Runnable {
 						serverInfoRefreshCallback.onServerInfoRefresh(object);
 					}
 				}
-				
-				if(object instanceof ShowQuestion) {
+
+				if (object instanceof ShowQuestion) {
 					try {
 						ShowQuestion request_data = (ShowQuestion) object;
 						Question question = new Question(request_data.question);
-						
+
 						controller.showQuestion(question);
 					} catch (NullPointerException e) {
 						System.err.println("Question is null !");
 					}
 				}
-				
-				if(object instanceof ServerEndGame) {
+
+				if (object instanceof ServerEndGame) {
 					ServerEndGame request_data = (ServerEndGame) object;
 					response = request_data;
-					
+
 					controller.endOnlineGame(request_data.score);
 				}
-				
-				if(object instanceof ServerCountDown) {
+
+				if (object instanceof ServerCountDown) {
 					int time = ((ServerCountDown) object).time;
 					controller.updateTimeLeftBeforeGameStart(time);
 				}
-				
-				if(object instanceof AnswerTimeLeft) {
+
+				if (object instanceof AnswerTimeLeft) {
 					int timeLeft = ((AnswerTimeLeft) object).timeLeftToAnswer;
 					int maxTime = ((AnswerTimeLeft) object).maxTime;
 					controller.updateTimeLeftToAnswer(timeLeft, maxTime);
 				}
-				
-				if(object instanceof PlayerActivityRequest) {
+
+				if (object instanceof PlayerActivityRequest) {
 					PlayerActivityAnswer answer = new PlayerActivityAnswer();
-					answer.isPlayerActive = true;
-					
+					answer.isPlayerActive = true; // TODO Can check some things to verify if player is still alive
 					sendTCPRequest(answer);
+				}
+
+				if (object instanceof PlayerRankResponse) {
+					PlayerRankResponse objectResponse = (PlayerRankResponse) object;
+					response = objectResponse;
 				}
 
 				if (callback != null)
@@ -249,7 +270,7 @@ public class NetworkThread implements Runnable {
 		timeElapsedSinceRequest = System.currentTimeMillis() - beginTime;
 		return timeElapsedSinceRequest;
 	}
-	
+
 	public void defineServerInfoRefreshCallback(IServerInfoRefreshRequest callback) {
 		serverInfoRefreshCallback = callback;
 	}
@@ -261,7 +282,7 @@ public class NetworkThread implements Runnable {
 	public enum NetworkJobStatus {
 		WAITING, FINISHED, TIMEDOUT;
 	}
-
+	
 	public class NetworkResponse {
 
 		private boolean isSuccedded;
@@ -288,6 +309,5 @@ public class NetworkThread implements Runnable {
 			this.isSuccedded = isSuccedded;
 		}
 
-		
 	}
 }

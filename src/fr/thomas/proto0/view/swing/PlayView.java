@@ -1,4 +1,4 @@
-package fr.thomas.proto0.view;
+package fr.thomas.proto0.view.swing;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
